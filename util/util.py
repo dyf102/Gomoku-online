@@ -5,6 +5,7 @@ from __future__ import print_function
 import sys
 import traceback
 import logging
+import uuid
 
 logger = logging
 def eprint(*args, **kwargs):
@@ -14,3 +15,6 @@ def print_trace_exception():
 	exc_type, exc_value, exc_traceback = sys.exc_info()
 	traceback.print_exception(exc_type, exc_value, exc_traceback,
                               limit=2, file=sys.stderr)
+
+def new_id():
+	return str(uuid.uuid4())

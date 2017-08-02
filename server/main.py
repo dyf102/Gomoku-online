@@ -8,8 +8,8 @@ import redis
 
 sys.path.append('../lib')
 sys.path.append('../util')
-from netstream import nethost, NET_NEW, NET_DATA
-from util import eprint, print_trace_exception
+from netstream import nethost, NET_NEW, NET_DATA, NET_LEAVE
+from util import eprint, print_trace_exception, new_id
 
 HOST = '0.0.0.0'
 PORT = 8888
@@ -18,7 +18,12 @@ logging.basicConfig(filename='example.log', level=logging.DEBUG)
 DELIMINATOR = '\r\n'
 r = redis.StrictRedis(host='localhost', port=6379, db=0)
 
-
+'''
+NET_NEW =		0	# new connection£º(id,tag) ip/d,port/w   <hid>
+NET_LEAVE =		1	# lost connection£º(id,tag)   		<hid>
+NET_DATA =		2	# data comming£º(id,tag) data...	<hid>
+NET_TIMER =		3	# timer event: (none, none) 
+'''
 class Server(object):
 
     def __init__(self, addr=HOST):
@@ -43,6 +48,7 @@ class Server(object):
     def listen(self):
         self._is_started = True
         logger.debug('Server starts at %s:%s', self._addr, self._port)
+        wparam = 0
         while self._is_started:
             self._host.process()
             event, wparam, lparam, data = self._host.read()
@@ -56,30 +62,39 @@ class Server(object):
                     logger.debug('The format of request is unexpected')
                 method = data[:idx]
                 content = data[idx + len(DELIMINATOR):]
+                # self._host.send(wparam, "hello")
                 self._host.send(wparam, self._handle(wparam, method, content))
+                # self._host.settag(wparam, wparam)
+                # self._host.nodelay(wparam, 1)
+                logger.debug('End of Send')
             elif event == NET_NEW:
                 if self.at_entry:
                     self.at_entry(wparam)  # client id
-                host.send(wparam, 'HELLO CLIENT %X' % (wparam))
-                host.settag(wparam, wparam)
-                host.nodelay(wparam, 1)
+                self._host.send(wparam, 'HELLO CLIENT %X' % (wparam))
+                # self._host.settag(wparam, wparam)
+                # self._host.nodelay(wparam, 1)
             elif event == NET_LEAVE and self.at_exit:
                 self.at_exit(wparam)  # client id
+        self._host.send(wparam,'quit')
 
-    def _handle(self, client_id, method, content):
+    def _handle(self, client_id, method, _str):
         try:
             func = self._handlers[method]
+            logger.debug('Return function: %s', str(func))
         except KeyError:
             logger.debug('The method is not support %s', method)
             return 'Method Not Exist: %s' % (method)
         except Exception as e:
-            printTraceException()
+            print(e)
+            print_trace_exception()
             return '500'
         try:
-            ret = func(self._content_decoder(client_id, content))
+            ret = func(client_id, self._content_decoder(_str))
+            logger.debug('Return %s', self._content_encoder(ret))
             return self._content_encoder(ret)
         except Exception as e:
-            printTraceException()
+            logger.debug('The method is not support 2 %s', method)
+            print_trace_exception()
         return '500'
 
     def set_at_entry(sefl, func):
@@ -94,6 +109,7 @@ class Server(object):
 
     def stop(self):
         self._is_started = False
+        
 
     def get_clients(self):
         return self._host.get_clients()
@@ -105,27 +121,34 @@ class Application(object):
         self.server = Server()
         self.current_user = {}
         self.current_idle_user = {}
+        self.add_login_signout()
 
     def add_login_signout(self):
 
         def login(client_id, user_info):
             self.current_user[client_id] = user_info
             self.current_idle_user[client_id] = user_info
-
+            return 'OK'
+        
         def signout(client_id):
             self.current_user[client_id] = None
             self.current_idle_user[client_id] = None
+        
         self.server.set_handler('login', login)
         self.server.set_at_exit(signout)
 
     def add_get_idle_user(self):
-        def get_idle_list(_, _):
+        def get_idle_list(_):
             return self.current_idle_user
-        self.server.set_handler('get_idle_list',get_idle_list)
+        self.server.set_handler('get_idle_list', get_idle_list)
 
     def run(self):
-    	self.server.bind()
-    	self.listem()
+        self.server.bind()
+        try:
+        	self.server.listen()
+        except KeyboardInterrupt as k:
+        	self.server.stop()
+        	raise k
 
 def main():
     game = Application()

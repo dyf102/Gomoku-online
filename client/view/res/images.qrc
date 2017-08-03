@@ -1,0 +1,7 @@
+<RCC>
+    <qresource>
+        <file alias="chessboard">chessboard.png</file>
+        <file alias="black">black.png</file>
+        <file alias="white">white.png</file>
+    </qresource>
+</RCC>

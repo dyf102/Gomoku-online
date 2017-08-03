@@ -4,7 +4,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from chat_widget import ChatWidget
 from chessboard_widget import ChessBoard
-from game_control import GameControlWidget
+from game_control_widget import GameControlWidget
 
 
 class GameWindow(QWidget):

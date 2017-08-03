@@ -2,13 +2,13 @@
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-import math
+# import math
 
 from res import images_rc
 
-#from src.Networking import game_play_manager
+# from src.Networking import game_play_manager
 
-#chess
+# chess
 NONE_CHESS  = 0
 WHITE_CHESS = 1
 BLACK_CHESS = 2

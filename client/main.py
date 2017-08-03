@@ -7,7 +7,7 @@ from PyQt4 import QtGui
 from view.login_widget import LoginDialog
 from view.chat_widget import ChatView
 from view.chessboard_widget import ChessBoard
-from view.game_window import GameWindow
+from view.game_window_widget import GameWindow
 
 sys.path.append('../')
 sys.path.append('./res')

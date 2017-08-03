@@ -8,7 +8,7 @@ import Queue
 
 sys.path.append('../lib')
 sys.path.append('../util')
-
+from util import new_id
 from netstream import netstream, NET_STATE_ESTABLISHED, NET_STATE_STOP
 PORT = 8888
 HOST = '127.0.0.1'
@@ -27,17 +27,12 @@ class Client():
 		self.port = port
 		self.host = host
 		self.c.connect(self.host, self.port)
-	def sender():
-		while True:
-        	item = q.get()
-        	self.c.process()
-        	if item.get('method') == 'login':
-        		self.c.send('login\r\n{}'.format(
-        			JSON.dumps({'nickname': item.get('nickname'), 'id': new_id()})
-        			))
+        self.start = False
+    #selfselfself.start = False
 
-	def reciever():
-		while True:
+	def reciever(self):
+		self.start = True
+		while self.start:
         	data = self.c.recv()
 			if len(data) > 0:
 				logger.debug(data)	

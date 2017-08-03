@@ -2,30 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7d2b4382-356e-4d0e-8464-e681de880510" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/Gomoku-online.iml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/client/main.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/client/res/images.qrc" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/client/res/images_rc.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/client/view/chat_widget.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/client/view/chessboard_widget.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/client/view/game_control.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/client/view/game_window.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/client/view/gamelist_widget.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/client/view/login_widget.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/netstream.py" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/client/gomoku.py" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/client/chat.py" afterPath="$PROJECT_DIR$/client/view/__init__.py" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/client/chessboard.py" afterPath="$PROJECT_DIR$/client/view/Lobby.py" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/client/gamelist.py" afterPath="$PROJECT_DIR$/client/res/__init__.py" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/client/images/black.png" afterPath="$PROJECT_DIR$/client/res/black.png" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/client/images/chessboard.png" afterPath="$PROJECT_DIR$/client/res/chessboard.png" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/client/images/white.png" afterPath="$PROJECT_DIR$/client/res/white.png" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/client/login.py" afterPath="$PROJECT_DIR$/client/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/client/controller/user_controller.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/client/network.py" afterPath="$PROJECT_DIR$/client/network.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -74,14 +51,24 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="network.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="network.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/client/network.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="346">
-              <caret line="31" column="0" lean-forward="true" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+            <state relative-caret-position="250">
+              <caret line="25" column="25" lean-forward="true" selection-start-line="25" selection-start-column="25" selection-end-line="25" selection-end-column="25" />
               <folding>
                 <element signature="e#47#57#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="user_controller.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/client/controller/user_controller.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="100">
+              <caret line="4" column="14" lean-forward="false" selection-start-line="4" selection-start-column="7" selection-end-line="4" selection-end-column="14" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -91,18 +78,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="200">
               <caret line="9" column="27" lean-forward="true" selection-start-line="9" selection-start-column="27" selection-end-line="9" selection-end-column="27" />
-              <folding>
-                <element signature="e#46#71#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Lobby.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/client/view/Lobby.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="50">
-              <caret line="3" column="26" lean-forward="false" selection-start-line="3" selection-start-column="26" selection-end-line="3" selection-end-column="26" />
               <folding>
                 <element signature="e#46#71#0" expanded="true" />
               </folding>
@@ -190,6 +165,7 @@
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/client/view/gamelist_widget.py" />
         <option value="$PROJECT_DIR$/client/view/Lobby.py" />
+        <option value="$PROJECT_DIR$/client/controller/user_controller.py" />
         <option value="$PROJECT_DIR$/client/network.py" />
       </list>
     </option>
@@ -227,6 +203,12 @@
               <item name="Gomoku-online" type="b2602c69:ProjectViewProjectNode" />
               <item name="Gomoku-online" type="462c0819:PsiDirectoryNode" />
               <item name="client" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Gomoku-online" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Gomoku-online" type="462c0819:PsiDirectoryNode" />
+              <item name="client" type="462c0819:PsiDirectoryNode" />
+              <item name="controller" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="Gomoku-online" type="b2602c69:ProjectViewProjectNode" />
@@ -404,9 +386,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="50">
           <caret line="3" column="26" lean-forward="false" selection-start-line="3" selection-start-column="26" selection-end-line="3" selection-end-column="26" />
-          <folding>
-            <element signature="e#46#71#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -571,9 +551,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="50">
           <caret line="3" column="26" lean-forward="false" selection-start-line="3" selection-start-column="26" selection-end-line="3" selection-end-column="26" />
-          <folding>
-            <element signature="e#46#71#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -589,11 +567,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/client/network.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="346">
-          <caret line="31" column="0" lean-forward="true" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+        <state relative-caret-position="250">
+          <caret line="25" column="25" lean-forward="true" selection-start-line="25" selection-start-column="25" selection-end-line="25" selection-end-column="25" />
           <folding>
             <element signature="e#47#57#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/client/controller/user_controller.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="100">
+          <caret line="4" column="14" lean-forward="false" selection-start-line="4" selection-start-column="7" selection-end-line="4" selection-end-column="14" />
+          <folding />
         </state>
       </provider>
     </entry>

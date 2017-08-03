@@ -28,7 +28,6 @@ class Client():
 		self.host = host
 		self.c.connect(self.host, self.port)
         self.start = False
-    #selfselfself.start = False
 
 	def reciever(self):
 		self.start = True

@@ -2,11 +2,14 @@
 # -*- coding: utf-8 -*-
 import sys
 import logging
+import os
 import json as JSON
 from network import Client
-from PyQt4.QtCore import SIGNAL, QObject
+from PyQt4.QtCore import SIGNAL, QObject, QString
+sys.path.append('../')
+from util.util import print_trace_exception
 
-LOGIN_ID = 'Login'
+LOGIN_ID = 'LOGIN'
 
 
 class UserController(QObject):
@@ -16,17 +19,35 @@ class UserController(QObject):
         QObject.__init__(self)
         self.c = Client()
         self.current_user = None
+        self.is_connecting = False
+        self.is_connected = False
+
+    def connect_client(self, addr, port):
+        if not (self.is_connected or self.is_connecting):
+            self.is_connecting = True
+            ret = self.c.connect(addr, port)
+            print(ret)
+            if ret == -1:
+                self.is_connecting = False
+                print_trace_exception()
+                raise os.ConnectionError()
+            self.is_connected = True
+            self.is_connecting = False
+
+    def is_logging(self):
+        return self.is_connecting
 
     def is_login(self):
-        return self.current_user is None
+        return self.is_connected
     
     def login(self, username):
+        # print(username)
         req = {
             'id': LOGIN_ID,
             'username': username
         }
         self.c.register(LOGIN_ID, self.login_callback)
-        self.c.send(JSON.dumps(req))
+        self.c.send('LOGIN', req)
 
     def login_callback(self, data):
         '''
@@ -42,5 +63,8 @@ class UserController(QObject):
         if data.get('uid') is None:
             logging.debug('Login Callback data is None %s', data)
         else:
-            self.current_user = data.get('user_info')
-        self.emit(SIGNAL("login_callback(int, str)"), data['code'], data['username'])
+            self.current_user = data.get('uinfo')
+            self.emit(SIGNAL("login_callback(int,QString)"), data['code'],
+                      QString(self.current_user.get('username')))
+            self.is_connected = True
+

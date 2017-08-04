@@ -7,11 +7,10 @@ import json as JSON
 import threading
 from time import sleep
 
-sys.path.append('../lib')
-sys.path.append('../util')
+sys.path.append('../')
 
-from util import new_id
-from netstream import netstream, NET_STATE_ESTABLISHED, NET_STATE_STOP
+from util.util import new_id
+from lib.netstream import netstream, NET_STATE_ESTABLISHED, NET_STATE_STOP
 PORT = 8888
 HOST = '127.0.0.1'
 logger = logging  # .getLogger('tcpserver')
@@ -31,8 +30,9 @@ class Client(object):
         self.receiver.daemon = True
         self.callback = {}
     
-    def connect(self, addr='127.0.0.1', port='8888'):
+    def connect(self, addr='127.0.0.1', port=8888):
         ret = self.c.connect(addr, port)
+        print(addr, port, ret)
         if ret == 0:
             self.receiver.start()
             return 0
@@ -43,22 +43,36 @@ class Client(object):
         while self.start:
             sleep(0.1)
             self.c.process()
-            if self.c.statue() == netstream.NET_STATE_ESTABLISHED:
+            if self.c.status() == NET_STATE_ESTABLISHED:
                 while True:
                     data = self.c.recv()
                     if data:
                         logging.debug('recv %s', data)
-                        msg = JSON.loads(data)
+                        try:
+                            msg = JSON.loads(data)
+                        except ValueError:
+                            logging.debug('JSON FORMAT Exception %s', data)
                         _id = msg.get('id')
                         if _id is None:
                             logging.debug('no id %s', data)
                             continue
                         try:
-                            self.callback[_id](data)
-                        except KeyError:
-                            logging.debug('unsupported id %s', data)
-            elif self.status() == netstream.NET_STATE_STOP:
+                            obj = JSON.loads(data)
+                            func = self.callback[_id]
+
+                        except KeyError as e:
+                            logging.debug('unsupported id: %s', data)
+                            raise e
+                        except ValueError as e:
+                            logging.debug('Invalid Format: %s', data)
+                            raise e
+                        else:
+                            func(obj)
+            elif self.c.status() == NET_STATE_STOP:
                 pass
+
+    def send(self, key, msg):
+        self.c.send('{}\r\n{}'.format(key, JSON.dumps(msg)))
 
     def register(self, key, callback):
         if not callable(callback):

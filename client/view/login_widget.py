@@ -6,7 +6,7 @@ from PyQt4.QtGui import QApplication, QIcon, \
 import sys
 
 
-DEFAULT_PORT = '8888'
+DEFAULT_PORT = 8888
 DEFAULT_ADDR = '127.0.0.1'
 
 WINDOW_WIDTH = 450
@@ -23,7 +23,7 @@ class LoginDialog(QDialog):
         self.setWindowTitle(title)
         self.setMaximumSize(WINDOW_WIDTH, WINDOW_HEIGHT)
         self.setMinimumSize(WINDOW_WIDTH, WINDOW_HEIGHT)
-        self.setWindowIcon(QIcon(':black'))
+        self.setWindowIcon(QIcon(':white'))
         self.setGeometry((window_size.width() - WINDOW_WIDTH) / 2,
                          (window_size.height() - WINDOW_HEIGHT) / 2 + 50,
                          WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -49,7 +49,7 @@ class LoginDialog(QDialog):
         self.ipEdit.setGeometry(160, 80, 130, 20)
 
         self.portEdit = QLineEdit(self)
-        self.portEdit.setPlaceholderText(DEFAULT_PORT)
+        self.portEdit.setPlaceholderText(str(DEFAULT_PORT))
         self.portEdit.setFocusPolicy(Qt.ClickFocus)
         self.portEdit.setGeometry(160, 120, 130, 20)
 
@@ -58,7 +58,7 @@ class LoginDialog(QDialog):
 
         loginBtn = QPushButton(self)
         loginBtn.setText('Login')
-        loginBtn.clicked.connect(self.loginEvent)
+        loginBtn.clicked.connect(self.login_event)
         loginBtn.setGeometry(210, 220, 85, 30)
 
         quitBtn = QPushButton(self)
@@ -66,29 +66,12 @@ class LoginDialog(QDialog):
         quitBtn.clicked.connect(parent.close)
         quitBtn.setGeometry(90, 220, 85, 30)
 
-        #self.loadingLbl = QLabel(self)
-        #self.loadingLbl.setGeometry(80, 0, 240, 300)
-        #self.loadingLbl.setHidden(True)
-        #self.loadingLbl.setContentsMargins(10, 0, 0, 0)
-        # self.movie = QMovie("res/loading.gif")
-        # self.movie.setScaledSize(QSize(200, 200))
-        # self.movie.setSpeed(70)
-        # self.loadingLbl.setMovie(self.movie)
-    '''
-    def showLoading(self):
-        self.loadingLbl.setHidden(False)
-        self.movie.start()
-
-    def hideLoading(self):
-        self.loadingLbl.setHidden(True)
-        self.movie.stop()
-    '''
-    def loginEvent(self):
+    def login_event(self):
         if not self.userEdit.text().length():
             return
         self.emit(SIGNAL("login(QString,int,QString)"),
-                  self.ipEdit.text() if self.ipEdit.text().length() else '127.0.0.1',
-                  self.portEdit.text().toLong() if self.portEdit.text().length() else 7890,
+                  self.ipEdit.text() if self.ipEdit.text().length() else DEFAULT_ADDR,
+                  self.portEdit.text().toLong() if self.portEdit.text().length() else DEFAULT_PORT,
                   self.userEdit.text())
 
     def closeEvent(self, event):

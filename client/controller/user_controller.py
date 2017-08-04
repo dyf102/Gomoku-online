@@ -4,15 +4,16 @@ import sys
 import logging
 import json as JSON
 from network import Client
-from PyQt4.QtCore import SIGNAL
+from PyQt4.QtCore import SIGNAL, QObject
 
 LOGIN_ID = 'Login'
 
 
-class UserController(object):
+class UserController(QObject):
     # TODO: add singleton to controller
 
     def __init__(self):
+        QObject.__init__(self)
         self.c = Client()
         self.current_user = None
 
@@ -42,4 +43,4 @@ class UserController(object):
             logging.debug('Login Callback data is None %s', data)
         else:
             self.current_user = data.get('user_info')
-        self.emit(SIGNAL("loginCallback(int)"), data['code'])
+        self.emit(SIGNAL("login_callback(int, str)"), data['code'], data['username'])

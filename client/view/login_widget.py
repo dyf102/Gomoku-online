@@ -63,18 +63,18 @@ class LoginDialog(QDialog):
 
         quitBtn = QPushButton(self)
         quitBtn.setText('Quit')
-        # quitBtn.clicked.connect(parent.close)
+        quitBtn.clicked.connect(parent.close)
         quitBtn.setGeometry(90, 220, 85, 30)
 
-        self.loadingLbl = QLabel(self)
-        self.loadingLbl.setGeometry(80, 0, 240, 300)
-        self.loadingLbl.setHidden(True)
-        self.loadingLbl.setContentsMargins(10, 0, 0, 0)
+        #self.loadingLbl = QLabel(self)
+        #self.loadingLbl.setGeometry(80, 0, 240, 300)
+        #self.loadingLbl.setHidden(True)
+        #self.loadingLbl.setContentsMargins(10, 0, 0, 0)
         # self.movie = QMovie("res/loading.gif")
         # self.movie.setScaledSize(QSize(200, 200))
         # self.movie.setSpeed(70)
         # self.loadingLbl.setMovie(self.movie)
-
+    '''
     def showLoading(self):
         self.loadingLbl.setHidden(False)
         self.movie.start()
@@ -82,7 +82,7 @@ class LoginDialog(QDialog):
     def hideLoading(self):
         self.loadingLbl.setHidden(True)
         self.movie.stop()
-
+    '''
     def loginEvent(self):
         if not self.userEdit.text().length():
             return

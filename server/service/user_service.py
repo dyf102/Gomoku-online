@@ -15,7 +15,13 @@ class UserService(BaseService):
         BaseService.__init__(self, 'UserService')
         self.current_user = {}
         self.current_idle_user = {}
-        self.add_login_signout()
+        self.load_handlers()
+
+    def load_handlers(self):
+        self.add_is_idle()
+        self.add_login()
+        self.add_logout()
+        self.add_get_idle_user()
 
     def add_is_idle(self):
         @Handler
@@ -44,6 +50,6 @@ class UserService(BaseService):
 
     def add_get_idle_user(self):
         @Handler
-        def get_idle_list(_):
+        def get_idle_list(client_id):
             return {'code': 200, 'idle_list': self.current_idle_user}
-        self.server.set_handler('get_idle_list', get_idle_list)
+        self.add_handler(get_idle_list)

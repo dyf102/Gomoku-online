@@ -20,8 +20,8 @@ class Application(object):
         self.register(UserService())
 
     def register(self, service):
-        assert isinstance(BaseService)
-        name = service.user_service
+        assert isinstance(service, BaseService)
+        name = service.get_name()
         self.hub[name] = service.get_handler
 
     def run(self):

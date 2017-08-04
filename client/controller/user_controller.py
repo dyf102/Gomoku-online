@@ -10,7 +10,7 @@ sys.path.append('../')
 from util.util import print_trace_exception
 
 LOGIN_ID = 'LOGIN'
-
+SERVICE_NAME = 'UserService'
 
 class UserController(QObject):
     # TODO: add singleton to controller
@@ -39,7 +39,7 @@ class UserController(QObject):
 
     def is_login(self):
         return self.is_connected
-    
+
     def login(self, username):
         # print(username)
         req = {
@@ -47,7 +47,7 @@ class UserController(QObject):
             'username': username
         }
         self.c.register(LOGIN_ID, self.login_callback)
-        self.c.send('LOGIN', req)
+        self.c.send(SERVICE_NAME, LOGIN_ID, req)
 
     def login_callback(self, data):
         '''

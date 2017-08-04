@@ -52,6 +52,9 @@ class BaseService(object):
         self.get_handler(key)
         return '{}_{}'.format(self.service_name, key)
 
+    def get_name(self):
+        return self.service_name
+
     @classmethod
     def get_id(cls, func):
         return str(func.__name__).capitalize()

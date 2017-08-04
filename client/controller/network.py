@@ -71,8 +71,8 @@ class Client(object):
             elif self.c.status() == NET_STATE_STOP:
                 pass
 
-    def send(self, key, msg):
-        self.c.send('{}\r\n{}'.format(key, JSON.dumps(msg)))
+    def send(self,service_name, method, msg):
+        self.c.send('{}\r\n{}\r\n{}'.format(service_name, method, JSON.dumps(msg)))
 
     def register(self, key, callback):
         if not callable(callback):

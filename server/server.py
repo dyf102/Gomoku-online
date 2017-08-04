@@ -3,16 +3,17 @@ import logging
 import json as JSON
 import redis
 
+sys.path.append('../')
 from lib.netstream import nethost, NET_NEW, NET_DATA, NET_LEAVE
 from util.util import print_trace_exception
 from lib.singleton import Singleton
 HOST = '0.0.0.0'
 PORT = 8888
-formatter = logging.Formatter('[%(asctime)s] p%(process)s \
-    {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
-                              '%m-%d %H:%M:%S')
+fmt = "[%(filename)s:%(lineno)s] %(message)s"
+#formatter = logging.Formatter(fmt)
 logger = logging
-logging.basicConfig(filename='example.log', level=logging.DEBUG, format=formatter)
+logging.basicConfig(filename='example.log',
+                    level=logging.DEBUG, format=fmt)
 
 DELIMINATOR = '\r\n'
 r = redis.StrictRedis(host='localhost', port=6379, db=0)
@@ -41,10 +42,6 @@ class Server(Singleton):
     def bind(self, port=PORT):
         self._port = port
         self._host.startup(port)
-
-    # def set_handler(self, method, func):
-    #    assert isinstance(method, basestring) and callable(func)
-    #    self._handlers[method] = func
 
     def listen(self, dispatch):
         self._is_started = True

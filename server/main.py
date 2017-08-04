@@ -4,12 +4,12 @@
 import sys
 import logging
 import json as JSON
-import redis
+# import redis
 from server import Server
 
 from service.user_service import UserService, BaseService
-sys.path.append('../')
-
+from util.util import print_trace_exception
+# sys.path.append('../')
 
 
 class Application(object):
@@ -27,10 +27,25 @@ class Application(object):
     def run(self):
         self.server.bind()
         try:
-            self.server.listen()
+            self.server.listen(dispatch=self.dispatch)
         except KeyboardInterrupt as k:
             self.server.stop()
             raise k
+
+    def dispatch(self, service_name, method):
+        try:
+            handlers = self.hub[service_name]
+        except KeyError as e:
+            logging.debug('Key not found: %s', service_name)
+            print_trace_exception()
+            raise e
+        try:
+            func = handlers[method]
+            return func
+        except KeyError as e:
+            logging.debug('Method not found %s', method)
+            print_trace_exception()
+            raise e
 
 def main():
     game = Application()

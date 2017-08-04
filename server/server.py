@@ -4,11 +4,12 @@ import json as JSON
 import redis
 
 from lib.netstream import nethost, NET_NEW, NET_DATA, NET_LEAVE
-from util.util import eprint, print_trace_exception, new_id
+from util.util import print_trace_exception
 from lib.singleton import Singleton
 HOST = '0.0.0.0'
 PORT = 8888
-formatter = logging.Formatter('[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
+formatter = logging.Formatter('[%(asctime)s] p%(process)s \
+    {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
                               '%m-%d %H:%M:%S')
 logger = logging
 logging.basicConfig(filename='example.log', level=logging.DEBUG, format=formatter)
@@ -26,7 +27,7 @@ NET_TIMER =        3    # timer event: (none, none)
 
 class Server(Singleton):
 
-    def __init__(self, adr=HOST):
+    def __init__(self, adr=HOST, dispatch=None):
         self._addr = adr
         self._host = nethost(adr)
         self._handlers = {'exit': self.stop}
@@ -41,11 +42,11 @@ class Server(Singleton):
         self._port = port
         self._host.startup(port)
 
-    def set_handler(self, method, func):
-        assert isinstance(method, basestring) and callable(func)
-        self._handlers[method] = func
+    # def set_handler(self, method, func):
+    #    assert isinstance(method, basestring) and callable(func)
+    #    self._handlers[method] = func
 
-    def listen(self):
+    def listen(self, dispatch):
         self._is_started = True
         logger.debug('Server starts at %s:%s', self._addr, self._port)
         wparam = 0
@@ -57,12 +58,7 @@ class Server(Singleton):
             logger.debug('event=%d wparam=%xh lparam=%xh data="%s"',
                          event, wparam, lparam, data)
             if event == NET_DATA:
-                idx = data.find(DELIMINATOR)
-                if idx == -1:
-                    logger.debug('The format of request is unexpected')
-                method = data[:idx]
-                content = data[idx + len(DELIMINATOR):]
-                self._host.send(wparam, self._handle(wparam, method, content))
+                self._host.send(self._handle(wparam, data))
                 logger.debug('End of Send')
             elif event == NET_NEW:
                 if self._at_entry:
@@ -71,25 +67,32 @@ class Server(Singleton):
                 self._at_exit(wparam)  # client id
         self._host.send(wparam, 'quit')
 
-    def _handle(self, client_id, method, _str):
+    def _handle(self, uid, data):
+        items = data.split(DELIMINATOR)
+        if len(items) < 3:
+            logger.debug('The format of request is unexpected')
+        service, method = items[0], items[1]
+        raw_data = DELIMINATOR.join(items[2:])
         try:
-            func = self._handlers[method]
-            logger.debug('Return function: %s', str(func))
-        except KeyError:
-            logger.debug('The method is not support %s', method)
-            return 'Method Not Exist: %s' % (method)
-        except Exception as e:
-            print(e)
-            print_trace_exception()
-            return '500'
+            data = self._content_decoder(raw_data)
+        except JSON.JSONDecodeError:
+            logging.debog("Unenable decode JSON Data %s", raw_data)
+            return self.sendError(400, '')
         try:
-            ret = func(client_id, self._content_decoder(_str))
-            logger.debug('Return %s', self._content_encoder(ret))
-            return self._content_encoder(ret)
+            ret_obj = self.dispatch(service, method)(uid, data)
         except Exception:
-            logger.debug('The method is not support 2 %s', method)
-            print_trace_exception()
-        return '500'
+            print_trace_exception
+            logger.exception()
+            return self.sendError(500, '')
+        try:
+            ret = JSON.dumps(ret_obj)
+            return ret
+        except JSON.JSONEncoderError:
+            logging.debog("Unenable encode Data to JSON %s", raw_data)
+            return self.sendError(500, '')
+
+    def sendError(self, code, msg):
+        return JSON.dumps({'code': code, 'msg': msg})
 
     def set_at_entry(self, func):
         assert callable(func) is True

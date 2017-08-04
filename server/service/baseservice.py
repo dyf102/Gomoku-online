@@ -11,6 +11,7 @@ class ServiceHandlerMissingException(ServiceException):
 
 def Handler(func):
     _id = BaseService.get_id(func)
+
     @wraps(func)
     def func_wrapper(*args, **kwargs):
         '''

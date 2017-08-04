@@ -1,0 +1,12 @@
+{
+	"folders":
+	[
+		{
+			"path": "/media/dw/687cf95b-581e-49da-9b3a-bb255f0e5fdb/Project/Gomoku-online"
+		}
+	],
+	    "settings": {
+        	"python_interpreter": "/usr/bin/python2.7",
+    		"src_root": "./"
+    	}
+}

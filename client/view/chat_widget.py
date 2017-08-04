@@ -11,6 +11,7 @@ class ChatWidget(QWidget):
         QWidget.__init__(self, parent)
         self.input_box = ChatInput(self)
         self.chat_view = ChatView(self)
+        print(self.geometry())
         self.chat_view.setGeometry(520, 10, 260, 250)
         self.input_box.setGeometry(520, 260, 260, 40)
 

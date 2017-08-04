@@ -4,6 +4,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 import sys
 from login_widget import LoginDialog
+from chat_widget import ChatWidget
 from time import sleep
 import logging
 
@@ -18,7 +19,7 @@ class GameLobby(QWidget):
         self.resize(800, 600)
         self.setWindowFlags(Qt.Window)
         self.main_frame = GameLobbyFrame(self)
-
+        self.main_frame.setGeometry(0, 0, 800, 600)
         self.login_controller = UserController()
         # UI
         self.login_widget = LoginDialog(self)
@@ -72,3 +73,5 @@ class GameLobbyFrame(QFrame):
     def __init__(self, parent=None):
         QFrame.__init__(self, parent)
         self.parent = parent
+        self.lobbyChat = ChatWidget(self)
+        # self.lobbyChat.setGeometry(10, 400, 781, 192)

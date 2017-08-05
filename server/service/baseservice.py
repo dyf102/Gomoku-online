@@ -1,5 +1,5 @@
 from functools import wraps
-
+from util.util import print_trace_exception
 
 class ServiceException(Exception):
     pass
@@ -20,7 +20,9 @@ def Handler(func):
         :param kwargs:
         :return: function
         '''
-        return func(*args, **kwargs).update({'id': _id})
+        re = func(*args, **kwargs)
+        re.update({'id': _id})
+        return re
     return func_wrapper
 
 
@@ -38,11 +40,15 @@ class BaseService(object):
 
     def del_handler(self, key): pass
 
+    def __getitem__(self, key):
+        return self.get_handler(key)
+
     def get_handler(self, key):
         assert isinstance(key, (unicode, str)) is True
         try:
             return self.handler[key]
         except KeyError:
+            print_trace_exception()
             raise ServiceHandlerMissingException()
 
     def get_handler_list(self):
@@ -57,4 +63,4 @@ class BaseService(object):
 
     @classmethod
     def get_id(cls, func):
-        return str(func.__name__).capitalize()
+        return str(func.__name__).upper()

@@ -22,7 +22,7 @@ class Application(object):
     def register(self, service):
         assert isinstance(service, BaseService)
         name = service.get_name()
-        self.hub[name] = service.get_handler
+        self.hub[name] = service
 
     def run(self):
         self.server.bind()
@@ -34,12 +34,15 @@ class Application(object):
 
     def dispatch(self, service_name, method):
         try:
+            #logging.debug('service_name %s', service_name)
+            #logging.debug('hub %s', self.hub)
             handlers = self.hub[service_name]
         except KeyError as e:
             logging.debug('Key not found: %s', service_name)
             print_trace_exception()
             raise e
         try:
+            # print(handlers.__name__, method)
             func = handlers[method]
             return func
         except KeyError as e:

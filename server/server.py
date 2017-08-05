@@ -45,6 +45,7 @@ class Server(Singleton):
 
     def listen(self, dispatch):
         self._is_started = True
+        self.dispatch = dispatch
         logger.debug('Server starts at %s:%s', self._addr, self._port)
         wparam = 0
         while self._is_started:
@@ -55,8 +56,9 @@ class Server(Singleton):
             logger.debug('event=%d wparam=%xh lparam=%xh data="%s"',
                          event, wparam, lparam, data)
             if event == NET_DATA:
-                self._host.send(self._handle(wparam, data))
-                logger.debug('End of Send')
+                ret = self._handle(wparam, data)
+                self._host.send(wparam, ret)
+                logger.debug('End of Send %s', ret)
             elif event == NET_NEW:
                 if self._at_entry:
                     self._at_entry(wparam)  # client id
@@ -74,20 +76,22 @@ class Server(Singleton):
             data = self._content_decoder(raw_data)
         except JSON.JSONDecodeError:
             logging.debog("Unenable decode JSON Data %s", raw_data)
-            return self.sendError(400, '')
+            return self.sendError(400, '1')
         try:
-            ret_obj = self.dispatch(service, method)(uid, data)
-        except Exception:
-            print_trace_exception
-            logger.exception()
-            return self.sendError(500, '')
+            func = self.dispatch(service, method)
+            ret_obj = func(uid, data)
+        except Exception as e:
+            print_trace_exception()
+            logger.exception(str(e))
+            return self.sendError(500, '2')
         try:
             ret = JSON.dumps(ret_obj)
             return ret
         except JSON.JSONEncoderError:
+            print_trace_exception()
             logging.debog("Unenable encode Data to JSON %s", raw_data)
-            return self.sendError(500, '')
-
+            return self.sendError(500, '3')
+        print("--" * 10)
     def sendError(self, code, msg):
         return JSON.dumps({'code': code, 'msg': msg})
 

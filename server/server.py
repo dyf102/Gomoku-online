@@ -8,10 +8,10 @@ sys.path.append('../')
 from lib.netstream import nethost, NET_NEW, NET_DATA, NET_LEAVE
 from util.util import print_trace_exception
 from lib.singleton import Singleton
+
 HOST = '0.0.0.0'
 PORT = 8888
 fmt = "[%(filename)s:%(lineno)s] %(message)s"
-#formatter = logging.Formatter(fmt)
 logger = logging
 logging.basicConfig(filename='example.log',
                     level=logging.DEBUG, format=fmt)
@@ -75,27 +75,25 @@ class Server(Singleton):
         service, method = items[0], items[1]
         raw_data = DELIMINATOR.join(items[2:])
         try:
-            data = self._content_decoder(raw_data)
+            _data = self._content_decoder(raw_data)
+            _data['uid'] = uid
         except JSON.JSONDecodeError:
-            logging.debog("Unenable decode JSON Data %s", raw_data)
-            return self.sendError(400, '1')
+            logging.debog("Unable decode JSON Data %s", raw_data)
+            return send_error(400, '1')
         try:
             func = self.dispatch(service, method)
-            ret_obj = func(uid, data)
+            ret_obj = func(**_data)
         except Exception as e:
             print_trace_exception()
             logger.exception(str(e))
-            return self.sendError(500, '2')
+            return send_error(500, '2')
         try:
             ret = JSON.dumps(ret_obj)
             return ret
         except JSON.JSONEncoderError:
             print_trace_exception()
-            logging.debog("Unenable encode Data to JSON %s", raw_data)
-            return self.sendError(500, '3')
-        print("--" * 10)
-    def sendError(self, code, msg):
-        return JSON.dumps({'code': code, 'msg': msg})
+            logging.debog("Unable encode Data to JSON %s", raw_data)
+            return send_error(500, '3')
 
     def set_at_entry(self, func):
         assert callable(func) is True
@@ -110,3 +108,7 @@ class Server(Singleton):
 
     def get_clients(self):
         return self._host.get_clients()
+
+
+def send_error(code, msg):
+    return JSON.dumps({'code': code, 'msg': msg})

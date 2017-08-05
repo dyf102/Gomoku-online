@@ -21,6 +21,15 @@ SERVICE_ID = new_id()
 LOGIN_METHOD_ID = new_id()
 
 
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
 class Client(object):
     __metaclass__ = Singleton   # ref:https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
 
@@ -81,10 +90,4 @@ class Client(object):
             raise AssertionError()
         self.callback[key] = callback
 
-class Singleton(type):
-    _instances = {}
 
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]

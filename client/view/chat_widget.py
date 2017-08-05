@@ -21,7 +21,8 @@ class ChatWidget(QWidget):
 
     def send_text(self, txt):
         uid = self.user_controller.current_user_id
-        self.chat_controller.send_msg(self.cid, uid, unicode(txt))
+        username = self.user_controller.current_username
+        self.chat_controller.send_msg(cid=self.cid, uid=uid, msg=unicode(txt), username=username)
 
 
 class ChatInput(QWidget):
@@ -58,10 +59,7 @@ class ChatView(QListView):
         self.setSelectionMode(QAbstractItemView.NoSelection)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setAcceptDrops(True)
-
-
         # self.updateLayout()
-
 
     def showText(self, text, r=0, g=0, b=0):
         color = QBrush(QColor(r, g, b))

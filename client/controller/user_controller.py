@@ -19,6 +19,7 @@ class UserController(BaseController):
         self.current_username = None
         self.current_user_id = None
         self.current_user_point = -1
+
     def is_logging(self):
         return self.is_connecting
 
@@ -46,13 +47,12 @@ class UserController(BaseController):
         '''
 
         logging.debug('Login Callback %s', data)
-        if data.get('uid') is None:
-            logging.debug('Login Callback data is None %s', data)
-        else:
+        try:
             self.current_username = data.get('username')
-            self.current_user_id = data.get('uid')
+            self.current_user_id = data['uid']
             self.current_user_point = data.get('point')
             self.emit(SIGNAL("login_callback(int,QString)"), data['code'],
                       QString(self.current_username))
             self.is_connected = True
-
+        except KeyError:
+            logging.debug('Login Callback data is None %s', data)

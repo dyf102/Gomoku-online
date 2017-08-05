@@ -10,7 +10,9 @@ import logging
 
 # sys.path.append('../')
 from controller.user_controller import UserController
+from controller.chat_controller import ChatController
 LOBBY_ROOM_ID = 0
+
 
 class GameLobby(QWidget):
     def __init__(self, parent=None):
@@ -20,13 +22,15 @@ class GameLobby(QWidget):
         self.setWindowFlags(Qt.Window)
         self.main_frame = GameLobbyFrame(self)
         self.main_frame.setGeometry(0, 0, 800, 600)
-        self.login_controller = UserController()
+        # Controller
+        self.user_controller = UserController()
+        self.chat_controller = ChatController()
         # UI
         self.login_widget = LoginDialog(self)
-        if not self.login_controller.is_login():
+        if not self.user_controller.is_login():
             self.login_widget.open()
         # signal
-        self.connect(self.login_controller, SIGNAL("login_callback(int,QString)"),
+        self.connect(self.user_controller, SIGNAL("login_callback(int,QString)"),
                      self.login_callback)
 
         self.connect(self.login_widget, SIGNAL("close"),
@@ -36,7 +40,7 @@ class GameLobby(QWidget):
         self.msg_box = QMessageBox()
 
     def close_login_dialog(self):
-        if self.login_controller.is_login():
+        if self.user_controller.is_login():
             self.login_widget.canClose = True
             self.login_widget.close()
 
@@ -59,10 +63,10 @@ class GameLobby(QWidget):
             username = unicode(username)
         if isinstance(addr, QString):
             addr = unicode(addr)
-        if not (self.login_controller.is_connecting or
-                self.login_controller.is_connected):
-            self.login_controller.connect_client(addr, port)
-            self.login_controller.login(username)
+        if not (self.user_controller.is_connecting or
+                self.user_controller.is_connected):
+            self.user_controller.connect_client(addr, port)
+            self.user_controller.login(username)
         else:
             self.msg_box.setIcon(QMessageBox.Warning)
             self.msg_box.setText("Network is busy")

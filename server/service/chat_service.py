@@ -3,6 +3,8 @@ import time
 
 from baseservice import BaseService, handler
 
+LOBBY_CHAT_ID = 0
+
 
 class ChatService(BaseService):
 
@@ -10,10 +12,13 @@ class ChatService(BaseService):
 
     def __init__(self):
         BaseService.__init__(self, 'ChatService')
-        self.chat_room_list = [0]
-        self.lobby_chat_room_id = 0
-        self.chat_room = {0: []}
-        self.chat_root_content = {0: []}
+        # init
+        self.chat_room_list = []
+        self.chat_room = {}
+        self.chat_root_content = {}
+        # next cid
+        self.next_cid = LOBBY_CHAT_ID
+        self.make_new_chat_room()
         self.load_handlers()
 
     def load_handlers(self):
@@ -21,11 +26,18 @@ class ChatService(BaseService):
         self.add_send_msg()
         self.add_get_msg()
 
+    def make_new_chat_room(self, uid=None):
+        cid = self.next_cid
+        self.next_cid += 1
+        self.chat_room_list.append(cid)
+        self.chat_room[cid] = [] if uid is None else [uid]
+        self.chat_root_content[cid] = []
+
     def add_join_chat_room(self):
         @handler
         def join_chat_room(id, uid, cid):
             if cid in self.chat_room_list:
-                self.chat_room[uid].append(cid)
+                self.chat_room[cid].append(uid)
                 return {'code': 200, 'content': self.chat_root_content[cid]}
             else:
                 return {'code': 404}

@@ -50,6 +50,8 @@ class GameLobby(QWidget):
             self.msg_box.setIcon(QMessageBox.Information)
             self.msg_box.setText("Login Successfully: Welcome {}".format(username))
             logging.debug("Login Successfully: Welcome {}".format(username))
+            # try to join the lobby chat room
+            self.chat_controller.join_chat_room(cid=LOBBY_ROOM_ID, uid=self.user_controller.current_user_id)
         else:
             self.msg_box.setIcon(QMessageBox.Warning)
             self.msg_box.setText("Login Failed: code {}".format(code))

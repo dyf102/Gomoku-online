@@ -9,7 +9,17 @@ class ServiceHandlerMissingException(ServiceException):
     pass
 
 
-def Handler(func):
+def register(_self):
+    def outter_wrapper(func):
+        @wraps(func)
+        def inner_wrapper(*args, **kwargs):
+            _self.add_handler(func)
+            return func(*args, **kwargs)
+        return inner_wrapper
+    return outter_wrapper
+
+
+def handler(func):
     _id = BaseService.get_id(func)
 
     @wraps(func)

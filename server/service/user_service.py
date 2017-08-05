@@ -6,7 +6,7 @@
 import logging
 # import json as JSON
 # import redis
-from baseservice import BaseService, Handler
+from baseservice import BaseService, handler
 
 
 class UserService(BaseService):
@@ -24,14 +24,14 @@ class UserService(BaseService):
         self.add_get_idle_user()
 
     def add_is_idle(self):
-        @Handler
+        @handler
         def is_idle(client_id):
             return {'code': 200, 'status':
                     client_id in self.current_idle_user.keys()}
         self.add_handler(is_idle)
 
     def add_login(self):
-        @Handler
+        @handler
         def login(client_id, user_info):
             self.current_user[client_id] = user_info
             self.current_idle_user[client_id] = user_info
@@ -40,7 +40,7 @@ class UserService(BaseService):
         self.add_handler(login)
 
     def add_logout(self):
-        @Handler
+        @handler
         def logout(client_id):
             self.current_user[client_id] = None
             self.current_idle_user[client_id] = None
@@ -49,7 +49,7 @@ class UserService(BaseService):
         self.add_handler(logout)
 
     def add_get_idle_user(self):
-        @Handler
+        @handler
         def get_idle_list(client_id):
             return {'code': 200, 'idle_list': self.current_idle_user}
         self.add_handler(get_idle_list)

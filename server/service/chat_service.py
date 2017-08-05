@@ -43,13 +43,12 @@ class ChatService(BaseService):
                 {'time': time.strftime("%Y-%m-%d %H:%M"), 'username': username, 'msg': msg})
         self.add_handler(send_msg)
 
-
     def add_get_msg(self):
         @handler
         def get_msg(cid, size=20):
             if cid not in self.chat_root_content:
                 return {'code': 404, 'msg': 'cannot send msg. Room not exists or User not in the room'}
             content_list = self.chat_root_content[cid]
-            size %= len(content_list)
+            size %= len(content_list)  # avoid size exceed
             return self.chat_root_content[cid][-size:]
         self.add_handler(get_msg)

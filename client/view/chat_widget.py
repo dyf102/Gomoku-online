@@ -2,11 +2,12 @@
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-# from src.Networking import game_play_manager
-# from src.Networking import game_room_manager
+from controller.chat_controller import ChatController
+from controller.user_controller import UserController
 
 
 class ChatWidget(QWidget):
+
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
         self.input_box = ChatInput(self)
@@ -14,6 +15,13 @@ class ChatWidget(QWidget):
         print(self.geometry())
         self.chat_view.setGeometry(520, 10, 260, 250)
         self.input_box.setGeometry(520, 260, 260, 40)
+        self.chat_controller = ChatController()
+        self.user_controller = UserController()
+        self.cid = parent.rid  # room id
+
+    def send_text(self, txt):
+        uid = self.user_controller.current_user_id
+        self.chat_controller.send_msg(self.cid, uid, unicode(txt))
 
 
 class ChatInput(QWidget):
@@ -28,10 +36,10 @@ class ChatInput(QWidget):
         self.hbox = QHBoxLayout(self)
         self.hbox.addWidget(self.textEdit)
         self.hbox.addWidget(self.sendBtn)
-        #self.hbox.addStretch(1)
+        # self.hbox.addStretch(1)
 
     def send_text(self):
-        # self.parent().sendText(str(self.textEdit.text()))
+        self.parent().send_text(str(self.textEdit.text()))
         self.textEdit.clear()
 
 

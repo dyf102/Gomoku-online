@@ -22,7 +22,7 @@ class Application(object):
             self.server.listen(dispatch=self.dispatch)
         except KeyboardInterrupt as k:
             self.server.stop()
-            raise k
+            # raise k
 
     def dispatch(self, service_name, method):
         try:

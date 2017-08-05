@@ -2,6 +2,7 @@ import sys
 import logging
 import json as JSON
 import redis
+from time import sleep
 
 sys.path.append('../')
 from lib.netstream import nethost, NET_NEW, NET_DATA, NET_LEAVE
@@ -49,6 +50,7 @@ class Server(Singleton):
         logger.debug('Server starts at %s:%s', self._addr, self._port)
         wparam = 0
         while self._is_started:
+            sleep(0.1)
             self._host.process()
             event, wparam, lparam, data = self._host.read()
             if event < 0:

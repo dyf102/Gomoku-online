@@ -13,7 +13,7 @@ from util.util import new_id
 from lib.netstream import netstream, NET_STATE_ESTABLISHED, NET_STATE_STOP
 PORT = 8888
 HOST = '127.0.0.1'
-logger = logging  # .getLogger('tcpserver')
+logger = logging
 logging.basicConfig(filename='example.log', level=logging.DEBUG)
 
 
@@ -22,7 +22,8 @@ LOGIN_METHOD_ID = new_id()
 
 
 class Client(object):
-    
+    __metaclass__ = Singleton   # ref:https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
+
     def __init__(self):
         self.c = netstream()
         self.start = False
@@ -79,3 +80,11 @@ class Client(object):
         if not callable(callback):
             raise AssertionError()
         self.callback[key] = callback
+
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]

@@ -10,7 +10,7 @@ import logging
 
 # sys.path.append('../')
 from controller.user_controller import UserController
-
+LOBBY_ROOM_ID = 0
 
 class GameLobby(QWidget):
     def __init__(self, parent=None):
@@ -72,6 +72,7 @@ class GameLobby(QWidget):
 class GameLobbyFrame(QFrame):
     def __init__(self, parent=None):
         QFrame.__init__(self, parent)
+        self.rid = LOBBY_ROOM_ID
         self.parent = parent
         self.lobbyChat = ChatWidget(self)
         # self.lobbyChat.setGeometry(10, 400, 781, 192)

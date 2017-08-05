@@ -3,37 +3,22 @@
 import sys
 import logging
 import os
-import json as JSON
-from network import Client
+# import json as JSON
 from PyQt4.QtCore import SIGNAL, QObject, QString
-sys.path.append('../')
-from util.util import print_trace_exception
+from basecontroller import BaseController
+
 
 LOGIN_ID = 'LOGIN'
 SERVICE_NAME = 'UserService'
 
-class UserController(QObject):
-    # TODO: add singleton to controller
+
+class UserController(BaseController):
 
     def __init__(self):
-        QObject.__init__(self)
-        self.c = Client()
-        self.current_user = None
-        self.is_connecting = False
-        self.is_connected = False
-
-    def connect_client(self, addr, port):
-        if not (self.is_connected or self.is_connecting):
-            self.is_connecting = True
-            ret = self.c.connect(addr, port)
-            print(ret)
-            if ret == -1:
-                self.is_connecting = False
-                print_trace_exception()
-                raise os.ConnectionError()
-            self.is_connected = True
-            self.is_connecting = False
-
+        BaseController.__init__(self, SERVICE_NAME)
+        self.current_username = None
+        self.current_user_id = None
+        self.current_user_point = -1
     def is_logging(self):
         return self.is_connecting
 
@@ -42,12 +27,13 @@ class UserController(QObject):
 
     def login(self, username):
         # print(username)
+        client = self.get_client()
         req = {
             'id': LOGIN_ID,
             'username': username
         }
-        self.c.register(LOGIN_ID, self.login_callback)
-        self.c.send(SERVICE_NAME, LOGIN_ID, req)
+        client.register(LOGIN_ID, self.login_callback)
+        client.send(SERVICE_NAME, LOGIN_ID, req)
 
     def login_callback(self, data):
         '''
@@ -63,8 +49,10 @@ class UserController(QObject):
         if data.get('uid') is None:
             logging.debug('Login Callback data is None %s', data)
         else:
-            self.current_user = data.get('uinfo')
+            self.current_username = data.get('username')
+            self.current_user_id = data.get('uid')
+            self.current_user_point = data.get('point')
             self.emit(SIGNAL("login_callback(int,QString)"), data['code'],
-                      QString(self.current_user.get('username')))
+                      QString(self.current_username))
             self.is_connected = True
 

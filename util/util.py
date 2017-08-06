@@ -27,8 +27,8 @@ def new_id():
 def log_callback(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        logging.debug("callback func:%s recieved: %s", func.__name__, kwargs.get('data') )
+        logging.debug("callback func:%s received: %s", func.__name__, str(args[1:]))
         ret = func(*args, **kwargs)
         logging.debug("callback func:%s return: %s", func.__name__, ret)
         return ret
-    return wraps
+    return wrapper

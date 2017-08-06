@@ -18,6 +18,9 @@ class ChatWidget(QWidget):
         self.chat_controller = ChatController()
         self.user_controller = UserController()
         self.cid = parent.rid  # room id
+        uid = self.user_controller.current_user_id
+        if uid:
+            self.chat_controller.add_polling_msg_task(self.cid, uid)
 
     def send_text(self, txt):
         uid = self.user_controller.current_user_id

@@ -5,13 +5,13 @@ import logging
 import os
 # import json as JSON
 from PyQt4.QtCore import SIGNAL, QObject, QString
-from basecontroller import BaseController
-
+from basecontroller import BaseController, singleton
 
 LOGIN_ID = 'LOGIN'
 SERVICE_NAME = 'UserService'
 
 
+@singleton
 class UserController(BaseController):
 
     def __init__(self):
@@ -48,7 +48,7 @@ class UserController(BaseController):
         logging.debug('Login Callback %s', data)
         try:
             self.current_username = data.get('username')
-            self.current_user_id = data['uid']
+            self.current_user_id = data.get('uid')
             self.current_user_point = data.get('point')
             self.emit(SIGNAL("login_callback(int,QString)"), data['code'],
                       QString(self.current_username))

@@ -35,9 +35,11 @@ class Client(object):
 
     def __init__(self):
         self.c = netstream()
-        self.start = False
+        self.start = self.is_scheduler_start = False
         self.receiver = threading.Thread(target=self.receiver)
         self.receiver.daemon = True
+        self.scheduler = threading.Thread(target=self.scheduler)
+        self.scheduler.daemon = True
         self.callback = {}
         self.periodic_task = []
 
@@ -46,14 +48,20 @@ class Client(object):
         logger.debug('connect %s, %d %d', adr, port, ret)
         if ret == 0:
             self.receiver.start()
+            self.scheduler.start()
             return 0
         return -1
-            
+
+    def scheduler(self):
+        self.is_scheduler_start = True
+        while self.is_scheduler_start:
+            sleep(1)
+            self.handle_periodic_task()
+
     def receiver(self):
         self.start = True
         while self.start:
             sleep(0.1)
-            self.handle_periodic_task()
             self.c.process()
             if self.c.status() == NET_STATE_ESTABLISHED:
                 while True:
@@ -87,20 +95,24 @@ class Client(object):
     def set_periodic_task(self, task, params, callback):
         '''
         All task run in the same frequency
-        :param task:
-        :param callback:
+        :param params: tuple
+        :param task: callable
+        :param callback: callable
         :return: None
         '''
         assert callable(task) and callable(callback)
         assert isinstance(params, tuple)
         task_id = str(task.__name__)
-        assert task_id not in self.callback.keys()  # avoid weird bug
-        self.periodic_task.append((task, params))
-        self.callback[task_id] = callback
+        # logger.debug("%s %s", str(task_id), str(self.callback.keys()))
+        if task_id not in self.callback.keys():
+            self.periodic_task.append((task, params))
+            self.callback[task_id] = callback
 
     def handle_periodic_task(self):
-        for (task, params) in self.periodic_task:
-            ret = task(*params)
+        # logger.debug("%d", len(self.periodic_task))
+        for (task, param) in self.periodic_task:
+            # logger.debug("handle_periodic: %s", task)
+            ret = task(*param)
             task_id = str(task.__name__)
             self.callback[task_id](ret)
 
@@ -112,4 +124,8 @@ class Client(object):
             raise AssertionError()
         self.callback[key] = callback
 
+    def close(self):
+        self.is_scheduler_start = False
+        self.start = False
+        self.c.close()
 

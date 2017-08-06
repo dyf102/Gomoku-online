@@ -7,7 +7,7 @@ from time import sleep
 sys.path.append('../')
 from lib.netstream import nethost, NET_NEW, NET_DATA, NET_LEAVE
 from util.util import print_trace_exception
-from lib.singleton import Singleton
+# from lib.singleton import Singleton
 
 HOST = '0.0.0.0'
 PORT = 8888
@@ -27,7 +27,7 @@ NET_TIMER =        3    # timer event: (none, none)
 '''
 
 
-class Server(Singleton):
+class Server(object):
 
     def __init__(self, adr=HOST):
         self._adr = adr

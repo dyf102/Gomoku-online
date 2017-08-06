@@ -7,10 +7,22 @@ import os
 from network import Client
 from PyQt4.QtCore import SIGNAL, QObject, QString
 sys.path.append('../')
-from util.util import print_trace_exception
+# from util.util import print_trace_exception
+
+
+def singleton(cls, *args, **kw):
+    instances = {}
+
+    def _singleton():
+        if cls not in instances:
+            instances[cls] = cls(*args, **kw)
+        return instances[cls]
+
+    return _singleton
 
 
 class BaseController(QObject):
+    _instance = None
 
     def __init__(self, service_name):
         QObject.__init__(self)
@@ -32,3 +44,4 @@ class BaseController(QObject):
 
     def get_client(self):
         return self.c
+

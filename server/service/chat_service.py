@@ -38,7 +38,7 @@ class ChatService(BaseService):
         def join_chat_room(uid, cid):
             if cid in self.chat_room_list:
                 self.chat_room[cid].append(uid)
-                return {'code': 200, 'content': self.chat_root_content[cid]}
+                return {'code': 200, 'uid': uid, 'cid': cid}
             else:
                 return {'code': 404}
         self.add_handler(join_chat_room)
@@ -60,10 +60,12 @@ class ChatService(BaseService):
 
     def add_get_msg(self):
         @handler
-        def get_msg(cid, size=20):
+        def get_msg(cid, uid):
             if cid not in self.chat_root_content:
                 return {'code': 404, 'msg': 'cannot send msg. Room not exists or User not in the room'}
+            if uid not in self.chat_room[cid]:
+                return {'code': 404, 'msg': 'uid %d not in the room cid: %d'.format(uid, cid)}
             content_list = self.chat_root_content[cid]
-            size %= len(content_list)  # avoid size exceed
-            return self.chat_root_content[cid][-size:]
+            size = min(len(content_list), 20)  # avoid size exceed
+            return {'code': 200, 'data': self.chat_root_content[cid][-size:]}
         self.add_handler(get_msg)

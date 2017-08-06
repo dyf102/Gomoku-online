@@ -30,13 +30,13 @@ class GameLobby(QWidget):
         if not self.user_controller.is_login():
             self.login_widget.open()
         # signal
-        self.connect(self.user_controller, SIGNAL("login_callback(int,QString)"),
-                     self.login_callback)
+        self.connect(self.user_controller, SIGNAL("login_callback(int,QString)"), self.login_callback)
 
         self.connect(self.login_widget, SIGNAL("close"),
                      self.close_login_dialog)
         self.connect(self.login_widget, SIGNAL("login(QString,int,QString)"),
                      self.login)
+        self.connect(self.chat_controller, SIGNAL("error_msg(QString)"), self.error_msg)
         self.msg_box = QMessageBox()
 
     def close_login_dialog(self):
@@ -51,7 +51,8 @@ class GameLobby(QWidget):
             self.msg_box.setText("Login Successfully: Welcome {}".format(username))
             logging.debug("Login Successfully: Welcome {}".format(username))
             # try to join the lobby chat room
-            self.chat_controller.join_chat_room(cid=LOBBY_ROOM_ID, uid=self.user_controller.current_user_id)
+            uid = self.user_controller.current_user_id
+            self.chat_controller.join_chat_room(cid=LOBBY_ROOM_ID, uid=uid)
         else:
             self.msg_box.setIcon(QMessageBox.Warning)
             self.msg_box.setText("Login Failed: code {}".format(code))
@@ -74,6 +75,9 @@ class GameLobby(QWidget):
             self.msg_box.setText("Network is busy")
             self.msg_box.exec_()
 
+    def error_msg(self, msg):
+        self.msg_box.setText(msg)
+        self.msg_box.exec_()
 
 class GameLobbyFrame(QFrame):
     def __init__(self, parent=None):

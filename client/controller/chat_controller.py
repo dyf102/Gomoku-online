@@ -9,6 +9,7 @@ from network import Client
 from PyQt4.QtCore import SIGNAL, QObject, QString
 from basecontroller import BaseController, singleton
 sys.path.append('../')
+
 from util.util import print_trace_exception, log_callback
 
 
@@ -23,6 +24,9 @@ class ChatController(BaseController):
 
     def __init__(self):
         BaseController.__init__(self, SERVICE_NAME)
+        self.c.register(GET_MSG_ID, self.get_msg_cb)
+        self.c.register(SEND_MSG_ID, self.send_msg_cb)
+        self.c.register(JOIN_CHAT_ROOM_ID, self.join_chat_room_cb)
 
     def send_msg(self, cid, uid, msg, username):
         client = self.get_client()
@@ -32,7 +36,6 @@ class ChatController(BaseController):
             'msg': msg,
             'username': username
         }
-        client.register(SEND_MSG_ID, self.send_msg_cb)
         client.send(service_name=SERVICE_NAME, method=SEND_MSG_ID, msg=req)
 
     def add_polling_msg_task(self, cid, uid):
@@ -51,12 +54,19 @@ class ChatController(BaseController):
             'cid': cid,
             'uid': uid
         }
-        client.register(GET_MSG_ID, self.get_msg_cb)
+
         client.send(service_name=SERVICE_NAME, method=GET_MSG_ID, msg=req)
 
     @log_callback
     def get_msg_cb(self, data):
-        logging.debug('send_msg %s', data)
+        if data and data.get('code') == 200:
+            for item in data.get(u'data'):
+                text = '{}: {} at{}'.format(item.get('username'),
+                                            item.get('msg'),
+                                            item.get('time'))
+
+                self.emit(SIGNAL("showRoomTextWithRGB(QString,int,int,int)"),
+                          text, 0, 0, 0)
 
     def join_chat_room(self, cid, uid):
         client = self.get_client()
@@ -64,7 +74,6 @@ class ChatController(BaseController):
             'cid': cid,
             'uid': uid,
         }
-        client.register(JOIN_CHAT_ROOM_ID, self.join_chat_room_cb)
         client.send(service_name=SERVICE_NAME, method=JOIN_CHAT_ROOM_ID, msg=req)
 
     @log_callback

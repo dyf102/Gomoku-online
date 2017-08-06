@@ -19,6 +19,7 @@ class UserController(BaseController):
         self.current_username = None
         self.current_user_id = None
         self.current_user_point = -1
+        self.c.register(LOGIN_ID, self.login_callback)
 
     def is_logging(self):
         return self.is_connecting
@@ -32,7 +33,6 @@ class UserController(BaseController):
         req = {
             'username': username
         }
-        client.register(LOGIN_ID, self.login_callback)
         client.send(SERVICE_NAME, LOGIN_ID, req)
 
     def login_callback(self, data):

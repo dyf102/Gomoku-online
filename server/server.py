@@ -29,16 +29,17 @@ NET_TIMER =        3    # timer event: (none, none)
 
 class Server(Singleton):
 
-    def __init__(self, adr=HOST, dispatch=None):
-        self._addr = adr
+    def __init__(self, adr=HOST):
+        self._adr = adr
         self._host = nethost(adr)
-        self._handlers = {'exit': self.stop}
+        # self._handlers = {'exit': self.stop}
         self._is_started = False
         self._content_decoder = JSON.loads
         self._content_encoder = JSON.dumps
         self._at_entry = None
         self._at_exit = None
         self._port = None
+        self.dispatch = None
 
     def bind(self, port=PORT):
         self._port = port
@@ -47,8 +48,10 @@ class Server(Singleton):
     def listen(self, dispatch):
         self._is_started = True
         self.dispatch = dispatch
-        logger.debug('Server starts at %s:%s', self._addr, self._port)
+        logger.debug('Server starts at %s:%s', self._adr, self._port)
         wparam = 0
+        if self._at_entry:
+            self._at_entry()
         while self._is_started:
             sleep(0.1)
             self._host.process()
@@ -67,6 +70,8 @@ class Server(Singleton):
             elif event == NET_LEAVE and self._at_exit:
                 self._at_exit(wparam)  # client id
         self._host.send(wparam, 'quit')
+        if self._at_exit:
+            self._at_exit()
 
     def _handle(self, uid, data):
         items = data.split(DELIMINATOR)
@@ -88,11 +93,12 @@ class Server(Singleton):
             logger.exception(str(e))
             return send_error(500, '2')
         try:
+            ret_obj.update({'id': method})
             ret = JSON.dumps(ret_obj)
             return ret
-        except JSON.JSONEncoderError:
+        except (ValueError, KeyError, TypeError):
             print_trace_exception()
-            logging.debog("Unable encode Data to JSON %s", raw_data)
+            logging.debug("Unable encode Data to JSON %s %s ", method, ret_obj)
             return send_error(500, '3')
 
     def set_at_entry(self, func):

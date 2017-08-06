@@ -17,6 +17,7 @@ class BaseController(QObject):
         self.c = Client()
         self.is_connecting = False
         self.is_connected = False
+        self.service_name = service_name
 
     def connect_client(self, adr, port):
         if not (self.is_connected or self.is_connecting):

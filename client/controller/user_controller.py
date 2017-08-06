@@ -30,7 +30,6 @@ class UserController(BaseController):
         # print(username)
         client = self.get_client()
         req = {
-            'id': LOGIN_ID,
             'username': username
         }
         client.register(LOGIN_ID, self.login_callback)

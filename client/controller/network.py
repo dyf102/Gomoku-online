@@ -6,9 +6,9 @@ import logging
 import json as JSON
 import threading
 from time import sleep
+from PyQt4.QtCore import *
 
 sys.path.append('../')
-
 from util.util import new_id
 from lib.netstream import netstream, NET_STATE_ESTABLISHED, NET_STATE_STOP
 PORT = 8888
@@ -39,10 +39,11 @@ class Client(object):
         self.receiver = threading.Thread(target=self.receiver)
         self.receiver.daemon = True
         self.callback = {}
-    
-    def connect(self, addr='127.0.0.1', port=8888):
-        ret = self.c.connect(addr, port)
-        print(addr, port, ret)
+        self.periodic_task = []
+
+    def connect(self, adr='127.0.0.1', port=8888):
+        ret = self.c.connect(adr, port)
+        logger.debug('connect %s, %d %d', adr, port, ret)
         if ret == 0:
             self.receiver.start()
             return 0
@@ -52,6 +53,7 @@ class Client(object):
         self.start = True
         while self.start:
             sleep(0.1)
+            self.handle_periodic_task()
             self.c.process()
             if self.c.status() == NET_STATE_ESTABLISHED:
                 while True:
@@ -70,7 +72,6 @@ class Client(object):
                         try:
                             obj = JSON.loads(data)
                             func = self.callback[_id]
-
                         except KeyError as e:
                             logging.debug('unsupported id: %s', data)
                             raise e
@@ -82,7 +83,28 @@ class Client(object):
             elif self.c.status() == NET_STATE_STOP:
                 pass
 
-    def send(self,service_name, method, msg):
+# TODO: implement a scheduler to periodically run task in different timeout
+    def set_periodic_task(self, task, params, callback):
+        '''
+        All task run in the same frequency
+        :param task:
+        :param callback:
+        :return: None
+        '''
+        assert callable(task) and callable(callback)
+        assert isinstance(params, tuple)
+        task_id = str(task.__name__)
+        assert task_id not in self.callback.keys()  # avoid weird bug
+        self.periodic_task.append((task, params))
+        self.callback[task_id] = callback
+
+    def handle_periodic_task(self):
+        for (task, params) in self.periodic_task:
+            ret = task(*params)
+            task_id = str(task.__name__)
+            self.callback[task_id](ret)
+
+    def send(self, service_name, method, msg):
         self.c.send('{}\r\n{}\r\n{}'.format(service_name, method, JSON.dumps(msg)))
 
     def register(self, key, callback):

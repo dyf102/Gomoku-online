@@ -33,7 +33,7 @@ class UserService(BaseService):
 
     def add_login(self):
         @handler
-        def login(id, uid, username):
+        def login(uid, username):
             self.current_user[uid] = User(username=username, uid=uid)
             return {'code': 200, 'uid': uid, 'username': username}
 
@@ -41,7 +41,7 @@ class UserService(BaseService):
 
     def add_logout(self):
         @handler
-        def logout(id, uid):
+        def logout(uid):
             self.current_user[uid] = None
             return {'code': 200, 'uid': uid}
 
@@ -49,13 +49,13 @@ class UserService(BaseService):
 
     def add_get_idle_user(self):
         @handler
-        def get_idle_list(id, uid):
+        def get_idle_list(uid):
             return {'code': 200, 'idle_list': self.current_idle_user}
         self.add_handler(get_idle_list)
 
     def add_get_rank(self):
         @handler
-        def get_user_rank(client_id):
+        def get_user_rank(uid):
             return {'code': 200, 'list': sorted(self.current_user, key=lambda user: user.point)}
 
         self.add_handler(get_user_rank)

@@ -1,5 +1,5 @@
 
-#!/usr/bin/env python
+# !/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
 import logging
@@ -25,14 +25,13 @@ class ChatController(BaseController):
     def send_msg(self, cid, uid, msg, username):
         client = self.get_client()
         req = {
-            'id': SEND_MSG_ID,
             'cid': cid,
             'uid': uid,
             'msg': msg,
             'username': username
         }
         client.register(SEND_MSG_ID, self.send_msg_cb)
-        client.send(SERVICE_NAME, SEND_MSG_ID, req)
+        client.send(service_name=SERVICE_NAME, method=SEND_MSG_ID, msg=req)
 
     @log_callback
     def send_msg_cb(self, data):
@@ -42,10 +41,11 @@ class ChatController(BaseController):
     def get_msg(self, cid, uid):
         client = self.get_client()
         req = {
-            'id': GET_MSG_ID,
             'cid': cid,
             'uid': uid
         }
+        client.register(GET_MSG_ID, self.get_msg_cb)
+        client.send(service_name=SERVICE_NAME, method=SEND_MSG_ID, msg=req)
 
     @log_callback
     def get_msg_cb(self, data):
@@ -54,12 +54,11 @@ class ChatController(BaseController):
     def join_chat_room(self, cid, uid):
         client = self.get_client()
         req = {
-            'id': JOIN_CHAT_ROOM_ID,
             'cid': cid,
             'uid': uid,
         }
         client.register(JOIN_CHAT_ROOM_ID, self.join_chat_room_cb)
-        client.send(SERVICE_NAME, JOIN_CHAT_ROOM_ID, req)
+        client.send(service_name=SERVICE_NAME, method=JOIN_CHAT_ROOM_ID, msg=req)
 
     @log_callback
     def join_chat_room_cb(self, data):

@@ -17,7 +17,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s - %(filename)s[line:%(lineno)d] '
                                '- %(levelname)s: %(message)s',
-                        filename='example.log')
+                        filename='client.log')
     app = QtGui.QApplication(sys.argv)
     window = GameLobby()
     window.setWindowTitle(u"五子棋")

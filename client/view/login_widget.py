@@ -78,4 +78,3 @@ class LoginDialog(QDialog):
         if not self.canClose:
             self.emit(SIGNAL("close"))
             event.ignore()
-

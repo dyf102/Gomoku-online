@@ -14,7 +14,7 @@ from lib.netstream import netstream, NET_STATE_ESTABLISHED, NET_STATE_STOP
 PORT = 8888
 HOST = '127.0.0.1'
 logger = logging
-logging.basicConfig(filename='example.log', level=logging.DEBUG)
+# logging.basicConfig(filename='example.log', level=logging.DEBUG)
 
 
 SERVICE_ID = new_id()

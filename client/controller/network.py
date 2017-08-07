@@ -62,7 +62,10 @@ class Client(object):
     def receiver(self):
         self.start = True
         while self.start:
-            sleep(0.1)
+            try:
+                sleep(0.1)  # time module has been collected
+            except Exception:
+                break
             self.c.process()
             if self.c.status() == NET_STATE_ESTABLISHED:
                 while True:
@@ -93,29 +96,29 @@ class Client(object):
                 pass
 
 # TODO: implement a scheduler to periodically run task in different timeout
-    def set_periodic_task(self, task, params, callback):
+    def set_periodic_task(self, task, params, callback, task_id):
         '''
         All task run in the same frequency
         :param params: tuple
         :param task: callable
         :param callback: callable
+        :param task_id: str
         :return: None
         '''
         assert callable(task) and callable(callback)
         assert isinstance(params, tuple)
-        task_id = str(task.__name__)
         # logger.debug("-----%s %s", str(task_id), str(self.callback.keys()))
-        if task_id not in self.callback.keys():
-            self.periodic_task.append((task, params))
-            self.periodic_task_callback[task_id] = callback
+        self.periodic_task.append((task, params))
 
     def handle_periodic_task(self):
-        # logger.debug("%d", len(self.periodic_task))
+        # print("------%d", len(self.periodic_task))
         for (task, param) in self.periodic_task:
-            # logger.debug("handle_periodic: %s", task)
-            ret = task(*param)
-            task_id = str(task.__name__)
-            self.periodic_task_callback[task_id](ret)
+            logger.debug("handle_periodic: %s", task)
+            task(*param)
+
+    @staticmethod
+    def generate_periodic_task_id(func):
+        return 'poll_' + str(func.__name__)
 
     def send(self, service_name, method, msg):
         self.c.send('{}\r\n{}\r\n{}'.format(service_name, method, JSON.dumps(msg)))

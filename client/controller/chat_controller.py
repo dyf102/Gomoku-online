@@ -40,7 +40,7 @@ class ChatController(BaseController):
 
     def add_polling_msg_task(self, cid, uid):
         client = self.get_client()
-        client.set_periodic_task(self.get_msg, (cid, uid), self.get_msg_cb)
+        client.set_periodic_task(self.get_msg, (cid, uid), self.get_msg_cb, GET_MSG_ID)
 
     @log_callback
     def send_msg_cb(self, data):

@@ -3,6 +3,8 @@
 
 from service.user_service import UserService
 from service.chat_service import ChatService
+from service.game_service import GameService
+
 from application import Application
 import sys
 import logging
@@ -15,7 +17,7 @@ def main():
                         format='%(asctime)s - %(filename)s[line:%(lineno)d] '
                                '- %(levelname)s: %(message)s',
                         filename='client.log')
-    game = Application([UserService, ChatService])
+    game = Application([UserService, ChatService, GameService])
     game.run()
 
 if __name__ == '__main__':

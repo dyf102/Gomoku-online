@@ -26,8 +26,8 @@ class Application(object):
 
     def dispatch(self, service_name, method):
         try:
-            #logging.debug('service_name %s', service_name)
-            #logging.debug('hub %s', self.hub)
+            # logging.debug('service_name %s', service_name)
+            # logging.debug('hub %s', self.hub)
             handlers = self.hub[service_name]
         except KeyError as e:
             logging.debug('Key not found: %s', service_name)

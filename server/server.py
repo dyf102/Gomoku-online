@@ -94,7 +94,8 @@ class Server(object):
             return send_error(500, '2')
         try:
             ret_obj.update({'id': method})
-            ret = JSON.dumps(ret_obj)
+            ret = self._content_encoder(ret_obj, default=lambda x: x.__dict__,
+                                        sort_keys=True)
             return ret
         except (ValueError, KeyError, TypeError):
             print_trace_exception()

@@ -6,6 +6,7 @@ import logging
 
 from PyQt4.QtCore import SIGNAL, QString
 from basecontroller import BaseController, singleton
+# from user_controller import UserController
 # sys.path.append('../')
 
 from util.util import print_trace_exception, log_callback
@@ -26,9 +27,10 @@ class ChatController(BaseController):
         self.c.register(SEND_MSG_ID, self.send_msg_cb)
         self.c.register(JOIN_CHAT_ROOM_ID, self.join_chat_room_cb)
         self.chat_token_pool = {}  # to avoid unnecessary update
+        # self.user_controller = UserController()
 
     def send_msg(self, cid, uid, msg, username):
-        print('called send msg')
+        # print('called send msg')
         client = self.get_client()
         req = {
             'cid': cid,

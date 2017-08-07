@@ -3,6 +3,7 @@ IDLE = 0
 OFFLINE = 1
 INGAME = 2
 
+
 class User(object):
 
     def __init__(self, username, uid, point=0, status=IDLE):

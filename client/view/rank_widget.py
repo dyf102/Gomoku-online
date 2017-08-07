@@ -1,6 +1,6 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-# from src.Networking import game_user_manager
+from controller.user_controller import UserController
 
 
 class RankList(QListView):
@@ -24,10 +24,20 @@ class RankList(QListView):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setAcceptDrops(True)
 
-        #self.connect(game_user_manager.GameUserManager(), SIGNAL("refreshRank"),
-        #             self.refresh)
+        self.connect(UserController(), SIGNAL("add_rank_item(QString, int)"), self.add_rank_item)
+        self.connect(UserController(), SIGNAL("clear"), self.clear)
 
-    def refresh(self):
+    def add_rank_item(self, username, point):
+        text = unicode(username) + ': ' + str(point)
+        item = QStandardItem(text)
+        item.setTextAlignment(Qt.AlignCenter)
+        self.model.appendRow(item)
+
+    def clear(self):
+        self.model.clear()
+
+    '''
+        def refresh(self):
         self.model.clear()
         rank = 0
         for user in [{'uid': 123, 'point': 12}]:
@@ -44,3 +54,5 @@ class RankList(QListView):
                     item.setForeground(QBrush(QColor(150, 0, 0)))
                 self.model.appendRow(item)
                 rank += 1
+    '''
+

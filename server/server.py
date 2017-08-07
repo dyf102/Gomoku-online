@@ -82,7 +82,7 @@ class Server(object):
         try:
             _data = self._content_decoder(raw_data)
             _data['uid'] = uid
-        except JSON.JSONDecodeError:
+        except KeyError:
             logging.debog("Unable decode JSON Data %s", raw_data)
             return send_error(400, '1')
         try:

@@ -8,7 +8,7 @@ from PyQt4.QtCore import SIGNAL, QObject, QString
 from basecontroller import BaseController, singleton
 
 LOGIN_ID = 'LOGIN'
-GET_RANK_ID = 'GET_RANK'
+GET_RANK_ID = 'GET_USER_RANK'
 
 SERVICE_NAME = 'UserService'
 
@@ -56,16 +56,33 @@ class UserController(BaseController):
             self.emit(SIGNAL("login_callback(int,QString)"), data['code'],
                       QString(self.current_username))
             self.is_connected = True
+
+            # self.add_polling_rank_task()
         except KeyError:
             logging.debug('Login Callback data is None %s', data)
 
-    def get_rank(self, uid):
+    def add_polling_rank_task(self):
+        c = self.get_client()
+        c.set_periodic_task(self.get_user_rank, (), self.get_user_rank_callback, GET_RANK_ID)
+
+    def get_user_rank(self):
         client = self.get_client()
         req = {
-            'uid': uid
+            'uid': self.current_user_id
         }
         client.send(SERVICE_NAME, GET_RANK_ID, req)
 
-    def get_rank_callback(self, data):
+    def get_user_rank_callback(self, data):
         if data and data.get('code') == 200:
-            pass
+            try:
+                user_list = data['list']
+            except KeyError:
+                logging.debug("get_rank: %s ", data)
+            else:
+                self.emit(SIGNAL('clear'))
+                for user in user_list:
+                    username = user.get('username')
+                    point = user.get('point')
+                    self.emit(SIGNAL('add_rank_item(QString, int)'), username, point)
+        else:
+            logging.debug("get_user_rank_callback: %s", data)

@@ -41,5 +41,11 @@ class UserService(BaseService):
         @register(self)
         @handler
         def get_user_rank(uid):
-            return {'code': 200, 'list': sorted(self.current_user, key=lambda user: user.point)}
+            rank_list = []
+            # TODO: to add max-heap to store current user
+            # TODO: cache the result
+            for _, user in self.current_user.items():
+                rank_list.append(user)
+            user_list = map(lambda u: u.__dict__, sorted(rank_list, key=lambda x: x.point))
+            return {'code': 200, 'list': user_list}
 

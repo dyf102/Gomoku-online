@@ -56,7 +56,11 @@ class Client(object):
     def scheduler(self):
         self.is_scheduler_start = True
         while self.is_scheduler_start:
-            sleep(1)
+            try:
+                sleep(1)
+            except Exception:
+                logging.exception()
+                break;
             self.handle_periodic_task()
 
     def receiver(self):
@@ -65,6 +69,7 @@ class Client(object):
             try:
                 sleep(0.1)  # time module has been collected
             except Exception:
+                logging.exception()
                 break
             self.c.process()
             if self.c.status() == NET_STATE_ESTABLISHED:
@@ -108,6 +113,8 @@ class Client(object):
         assert callable(task) and callable(callback)
         assert isinstance(params, tuple)
         # logger.debug("-----%s %s", str(task_id), str(self.callback.keys()))
+        if task_id not in self.callback.keys():
+            self.callback[task_id] = callback
         self.periodic_task.append((task, params))
 
     def handle_periodic_task(self):

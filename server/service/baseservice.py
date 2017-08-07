@@ -1,6 +1,6 @@
 from functools import wraps
 import sys
-sys.path.append('../')
+# sys.path.append('../')
 from util.util import print_trace_exception
 
 
@@ -14,9 +14,10 @@ class ServiceHandlerMissingException(ServiceException):
 
 def register(_self):
     def outer_wrapper(func):
+        _self.add_handler(func)
+
         @wraps(func)
         def inner_wrapper(*args, **kwargs):
-            _self.add_handler(func)
             return func(*args, **kwargs)
         return inner_wrapper
     return outer_wrapper

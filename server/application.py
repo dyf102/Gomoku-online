@@ -20,7 +20,7 @@ class Application(object):
         self.server.bind()
         try:
             self.server.listen(dispatch=self.dispatch)
-        except KeyboardInterrupt as k:
+        except KeyboardInterrupt:  #  as k:
             self.server.stop()
             # raise k
 

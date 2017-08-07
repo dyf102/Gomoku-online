@@ -6,7 +6,7 @@ import sys
 from login_widget import LoginDialog
 from chat_widget import ChatWidget
 from rank_widget import RankList
-from time import sleep
+from gamelist_widget import GameListWidget
 import logging
 
 # sys.path.append('../')
@@ -30,6 +30,7 @@ class GameLobby(QWidget):
         self.chat_controller = ChatController()
         # UI
         self.login_widget = LoginDialog(self)
+
         if not self.user_controller.is_login():
             self.login_widget.open()
         # signal
@@ -90,7 +91,10 @@ class GameLobbyFrame(QFrame):
         self.parent = parent
         self.setGeometry(0, 0, 800, 600)
 
-        # self.lobbyChat.setGeometry(10, 400, 781, 192)
+        # UI
+        self.game_list_widget = GameListWidget(self)
+        self.game_list_widget.setGeometry(40, 40, 550, 450)
+
         self.rankTitle = QLabel(self)
         self.rankTitle.setText('Rank')
         self.rankTitle.setStyleSheet(QString(u"font: 75 14pt \"微软雅黑\";\n \
@@ -99,13 +103,17 @@ class GameLobbyFrame(QFrame):
         self.rankTitle.setGeometry(600, 20, 190, 20)
         self.rankList = RankList(self)
         self.rankList.setGeometry(600, 55, 190, 180)
+
         self.lobbyChat = ChatWidget(self)
-        self.lobbyChat.input_box.setGeometry(600, 480, 190, 220)
-        self.lobbyChat.chat_view.setGeometry(600, 480, 190, 30)
+        self.lobbyChat.input_box.setGeometry(600, 480, 190, 30)
+        self.lobbyChat.chat_view.setGeometry(600, 250, 190, 220)
 
         self.lobbyChat.chat_view.connect(ChatController(),
                                          SIGNAL('showRoomTextWithRGB(QString,int,int,int)'),
                                          self.lobbyChat.chat_view.showText)
+        self.lobbyChat.chat_view.connect(ChatController(),
+                                         SIGNAL('clear'),
+                                         self.lobbyChat.chat_view.clear)
         self.lobbyChat.chat_view.connect(GameController(),
                                          SIGNAL('showRoomTextWithRGB(QString,int,int,int)'),
                                          self.lobbyChat.chat_view.showText)

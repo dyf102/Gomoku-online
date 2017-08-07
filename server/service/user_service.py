@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
-from baseservice import BaseService, handler  # , register
+from baseservice import BaseService, handler, register
 from model.user import User
 
 
@@ -16,37 +16,30 @@ class UserService(BaseService):
 
     def load_handlers(self):
         # self.add_is_idle()
-        self.add_login()
-        self.add_logout()
-        self.add_get_idle_user()
-        self.add_get_rank()
+        # self.add_login()
+        # self.add_logout()
+        # self.add_get_idle_user()
+        # self.add_get_rank()
 
-    def add_login(self):
+        @register(self)
         @handler
         def login(uid, username):
             self.current_user[uid] = User(username=username, uid=uid)
             return {'code': 200, 'uid': uid, 'username': username}
 
-        self.add_handler(login)
-
-    def add_logout(self):
+        @register(self)
         @handler
         def logout(uid):
             self.current_user[uid] = None
             return {'code': 200, 'uid': uid}
 
-        self.add_handler(logout)
-
-    def add_get_idle_user(self):
+        @register(self)
         @handler
         def get_idle_list(uid):
             return {'code': 200, 'idle_list': self.current_idle_user}
-        self.add_handler(get_idle_list)
 
-    def add_get_rank(self):
+        @register(self)
         @handler
         def get_user_rank(uid):
             return {'code': 200, 'list': sorted(self.current_user, key=lambda user: user.point)}
-
-        self.add_handler(get_user_rank)
 

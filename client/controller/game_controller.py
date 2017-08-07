@@ -4,7 +4,7 @@ import sys
 import logging
 import json as JSON
 from network import Client
-from PyQt4.QtCore import SIGNAL, QObject
+from PyQt4.QtCore import SIGNAL, QObject, QString
 from basecontroller import BaseController
 
 SERVICE_NAME = 'GameService'
@@ -15,6 +15,7 @@ class GameController(BaseController):
 
     def __init__(self):
         BaseController.__init__(self, service_name=SERVICE_NAME)
+        self.game_list = None
 
     def add_polling_game_list_task(self):
         client = self.get_client()
@@ -29,4 +30,9 @@ class GameController(BaseController):
         if data and data.get('code') == 200:
             game_list = data.get('list')
             logging.debug("get_game_list_callback %s", game_list)
-
+            self.game_list = game_list
+            for game in game_list:
+                txt = '{} vs {}'.format(game.get('host_name'), game.get('guest_name'))
+                logging.debug("----- %s", txt)
+                self.emit(SIGNAL('addItem(QString)'),
+                          QString('{} vs {}'.format(game.get('host_name'), game.get('guest_name'))))

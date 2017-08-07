@@ -57,7 +57,7 @@ class Client(object):
         self.is_scheduler_start = True
         while self.is_scheduler_start:
             try:
-                sleep(1)
+                sleep(2)
             except Exception:
                 logging.exception()
                 break;
@@ -113,14 +113,14 @@ class Client(object):
         assert callable(task) and callable(callback)
         assert isinstance(params, tuple)
         # logger.debug("-----%s %s", str(task_id), str(self.callback.keys()))
-        if task_id not in self.callback.keys():
-            self.callback[task_id] = callback
+        # if task_id not in self.callback.keys():
+        self.callback[task_id] = callback
         self.periodic_task.append((task, params))
 
     def handle_periodic_task(self):
         # print("------%d", len(self.periodic_task))
         for (task, param) in self.periodic_task:
-            logger.debug("handle_periodic: %s", task)
+            # logger.debug("handle_periodic: %s", task)
             task(*param)
 
     @staticmethod

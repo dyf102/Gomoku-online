@@ -6,6 +6,7 @@ import os
 # import json as JSON
 from PyQt4.QtCore import SIGNAL, QObject, QString
 from basecontroller import BaseController, singleton
+from controller.game_controller import GameController
 
 LOGIN_ID = 'LOGIN'
 GET_RANK_ID = 'GET_USER_RANK'
@@ -23,6 +24,8 @@ class UserController(BaseController):
         self.current_user_point = -1
 
         self.c.register(LOGIN_ID, self.login_callback)
+
+        self.game_controller = GameController()
 
     def is_logging(self):
         return self.is_connecting
@@ -57,7 +60,8 @@ class UserController(BaseController):
                       QString(self.current_username))
             self.is_connected = True
 
-            # self.add_polling_rank_task()
+            self.add_polling_rank_task()
+            self.game_controller.add_polling_game_list_task()
         except KeyError:
             logging.debug('Login Callback data is None %s', data)
 

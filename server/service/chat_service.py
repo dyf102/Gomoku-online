@@ -61,9 +61,9 @@ class ChatService(BaseService):
             if uid not in self.chat_room[cid]:
                 return {'code': 404, 'msg': 'uid %d not in the room cid: %d'.format(uid, cid)}
             content_list = self.chat_root_content[cid]
-            size = min(len(content_list), 20)  # avoid size exceed
-            msgs = self.chat_root_content[cid][-size:]
-            return {'code': 200, 'cid': cid, 'data': msgs, 'token': hash(str(msgs))}
+            # size = min(len(content_list), 20)  # avoid size exceed
+            msgs = content_list  # self.chat_root_content[cid][-size:]
+            return {'code': 200, 'cid': cid, 'data': msgs, 'token': str(hash(str(msgs)))}
 
         @register(self)
         @handler

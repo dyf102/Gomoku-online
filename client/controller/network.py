@@ -60,7 +60,7 @@ class Client(object):
                 sleep(2)
             except Exception:
                 logging.exception()
-                break;
+                break
             self.handle_periodic_task()
 
     def receiver(self):

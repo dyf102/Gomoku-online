@@ -30,7 +30,7 @@ class ChatController(BaseController):
         # self.user_controller = UserController()
 
     def send_msg(self, cid, uid, msg, username):
-        # print('called send msg')
+        print('called send msg')
         client = self.get_client()
         req = {
             'cid': cid,
@@ -46,7 +46,7 @@ class ChatController(BaseController):
 
     @log_callback
     def send_msg_cb(self, data):
-        logging.debug('send_msg %s', data)
+        # logging.debug('send_msg %s', data)
         self.emit(SIGNAL("send_msg_callback(int)"), data['code'])
 
     def get_msg(self, cid, uid):

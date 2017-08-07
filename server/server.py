@@ -77,6 +77,7 @@ class Server(object):
         items = data.split(DELIMINATOR)
         if len(items) < 3:
             logger.debug('The format of request is unexpected')
+            return send_error(400, 'Invalid Request Format')
         service, method = items[0], items[1]
         raw_data = DELIMINATOR.join(items[2:])
         try:
@@ -94,7 +95,8 @@ class Server(object):
             return send_error(500, '2')
         try:
             ret_obj.update({'id': method})
-            ret = self._content_encoder(ret_obj, default=lambda x: x.__dict__,
+            ret = self._content_encoder(ret_obj,
+                                        default=lambda x: x.__dict__,
                                         sort_keys=True)
             return ret
         except (ValueError, KeyError, TypeError):

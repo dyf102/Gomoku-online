@@ -34,7 +34,7 @@ class ChatInput(QWidget):
         self.textEdit = QLineEdit(self)
         self.textEdit.setFocusPolicy(Qt.ClickFocus)
         self.sendBtn = QPushButton(self)
-        self.sendBtn.setText(u'send')
+        self.sendBtn.setText(u'Send')
         self.sendBtn.clicked.connect(self.send_text)
         self.sendBtn.setFocusPolicy(Qt.ClickFocus)
         self.hbox = QHBoxLayout(self)
@@ -43,6 +43,7 @@ class ChatInput(QWidget):
         # self.hbox.addStretch(1)
 
     def send_text(self):
+        self.sendBtn.setDisabled(True)
         self.parent().send_text(str(self.textEdit.text()))
         self.textEdit.clear()
 

@@ -28,11 +28,10 @@ class GameController(BaseController):
 
     def get_game_list_callback(self, data):
         if data and data.get('code') == 200:
-            game_list = data.get('list')
+            game_list = data.get(u'list')
             logging.debug("get_game_list_callback %s", game_list)
             self.game_list = game_list
             for game in game_list:
                 txt = '{} vs {}'.format(game.get('host_name'), game.get('guest_name'))
                 logging.debug("----- %s", txt)
-                self.emit(SIGNAL('addItem(QString)'),
-                          QString('{} vs {}'.format(game.get('host_name'), game.get('guest_name'))))
+                self.emit(SIGNAL("add_item(QString)"), QString(txt))

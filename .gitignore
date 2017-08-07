@@ -1,6 +1,6 @@
 Gomoku.sublime-*
 *.pyc
-.idea
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -103,3 +103,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+client/view/common/
+# lib/
+# util/

@@ -14,7 +14,7 @@ from lib.netstream import netstream, NET_STATE_ESTABLISHED, NET_STATE_STOP
 PORT = 8888
 HOST = '127.0.0.1'
 logger = logging
-logging.basicConfig(filename='example.log', level=logging.DEBUG)
+# logging.basicConfig(filename='example.log', level=logging.DEBUG)
 
 
 SERVICE_ID = new_id()
@@ -42,6 +42,7 @@ class Client(object):
         self.scheduler.daemon = True
         self.callback = {}
         self.periodic_task = []
+        self.periodic_task_callback = {}
 
     def connect(self, adr='127.0.0.1', port=8888):
         ret = self.c.connect(adr, port)
@@ -103,10 +104,10 @@ class Client(object):
         assert callable(task) and callable(callback)
         assert isinstance(params, tuple)
         task_id = str(task.__name__)
-        # logger.debug("%s %s", str(task_id), str(self.callback.keys()))
+        # logger.debug("-----%s %s", str(task_id), str(self.callback.keys()))
         if task_id not in self.callback.keys():
             self.periodic_task.append((task, params))
-            self.callback[task_id] = callback
+            self.periodic_task_callback[task_id] = callback
 
     def handle_periodic_task(self):
         # logger.debug("%d", len(self.periodic_task))
@@ -114,7 +115,7 @@ class Client(object):
             # logger.debug("handle_periodic: %s", task)
             ret = task(*param)
             task_id = str(task.__name__)
-            self.callback[task_id](ret)
+            self.periodic_task_callback[task_id](ret)
 
     def send(self, service_name, method, msg):
         self.c.send('{}\r\n{}\r\n{}'.format(service_name, method, JSON.dumps(msg)))

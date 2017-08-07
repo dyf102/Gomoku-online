@@ -2,11 +2,8 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# import sys
 import logging
-# import json as JSON
-# import redis
-from baseservice import BaseService, handler, register
+from baseservice import BaseService, handler  # , register
 from model.user import User
 
 
@@ -23,13 +20,6 @@ class UserService(BaseService):
         self.add_logout()
         self.add_get_idle_user()
         self.add_get_rank()
-
-    # def add_is_idle(self):
-    #    @handler
-    #    def is_idle(client_id):
-    #        return {'code': 200, 'status':
-    #                self.current_user.get(client_id)}
-    #    self.add_handler(is_idle)
 
     def add_login(self):
         @handler

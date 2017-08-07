@@ -12,9 +12,9 @@ class ChatWidget(QWidget):
         QWidget.__init__(self, parent)
         self.input_box = ChatInput(self)
         self.chat_view = ChatView(self)
-        print(self.geometry())
-        self.chat_view.setGeometry(520, 10, 260, 250)
-        self.input_box.setGeometry(520, 260, 260, 40)
+        # print(self.geometry())
+        # self.chat_view.setGeometry(520, 10, 260, 250)
+        # self.input_box.setGeometry(520, 260, 260, 40)
         self.chat_controller = ChatController()
         self.user_controller = UserController()
         self.cid = parent.rid  # room id
@@ -68,7 +68,7 @@ class ChatView(QListView):
         color = QBrush(QColor(r, g, b))
         item = QStandardItem(text)
         item.setTextAlignment(Qt.AlignLeft)
-        item.setFont(QFont(50))
+        # item.setFont(QFont(50))
         item.setForeground(color)
         self.model.appendRow(item)
         self.scrollTo(self.model.indexFromItem(item),
@@ -76,3 +76,4 @@ class ChatView(QListView):
 
     def clear(self):
         self.model.clear()
+

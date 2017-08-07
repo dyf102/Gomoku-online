@@ -8,6 +8,8 @@ from PyQt4.QtCore import SIGNAL, QObject, QString
 from basecontroller import BaseController, singleton
 
 LOGIN_ID = 'LOGIN'
+GET_RANK_ID = 'GET_RANK'
+
 SERVICE_NAME = 'UserService'
 
 
@@ -19,6 +21,8 @@ class UserController(BaseController):
         self.current_username = None
         self.current_user_id = None
         self.current_user_point = -1
+
+        self.c.register(LOGIN_ID, self.login_callback)
 
     def is_logging(self):
         return self.is_connecting
@@ -32,7 +36,6 @@ class UserController(BaseController):
         req = {
             'username': username
         }
-        client.register(LOGIN_ID, self.login_callback)
         client.send(SERVICE_NAME, LOGIN_ID, req)
 
     def login_callback(self, data):
@@ -55,3 +58,14 @@ class UserController(BaseController):
             self.is_connected = True
         except KeyError:
             logging.debug('Login Callback data is None %s', data)
+
+    def get_rank(self, uid):
+        client = self.get_client()
+        req = {
+            'uid': uid
+        }
+        client.send(SERVICE_NAME, GET_RANK_ID, req)
+
+    def get_rank_callback(self, data):
+        if data and data.get('code') == 200:
+            pass

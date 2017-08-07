@@ -5,12 +5,15 @@ from PyQt4.QtCore import *
 import sys
 from login_widget import LoginDialog
 from chat_widget import ChatWidget
+from rank_widget import RankList
 from time import sleep
 import logging
 
 # sys.path.append('../')
 from controller.user_controller import UserController
 from controller.chat_controller import ChatController
+from controller.game_controller import GameController
+
 LOBBY_ROOM_ID = 0
 
 
@@ -18,7 +21,7 @@ class GameLobby(QWidget):
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
         self.idle_list = []
-        self.resize(800, 600)
+        # self.resize(800, 600)
         self.setWindowFlags(Qt.Window)
         self.main_frame = GameLobbyFrame(self)
         self.main_frame.setGeometry(0, 0, 800, 600)
@@ -79,10 +82,30 @@ class GameLobby(QWidget):
         self.msg_box.setText(msg)
         self.msg_box.exec_()
 
+
 class GameLobbyFrame(QFrame):
     def __init__(self, parent=None):
         QFrame.__init__(self, parent)
         self.rid = LOBBY_ROOM_ID
         self.parent = parent
-        self.lobbyChat = ChatWidget(self)
+        self.setGeometry(0, 0, 800, 600)
+
         # self.lobbyChat.setGeometry(10, 400, 781, 192)
+        self.rankTitle = QLabel(self)
+        self.rankTitle.setText('Rank')
+        self.rankTitle.setStyleSheet(QString(u"font: 75 14pt \"微软雅黑\";\n \
+                                               color: rgb(100, 100, 200);"))
+        self.rankTitle.setAlignment(Qt.AlignCenter)
+        self.rankTitle.setGeometry(600, 20, 190, 20)
+        self.rankList = RankList(self)
+        self.rankList.setGeometry(600, 55, 190, 180)
+        self.lobbyChat = ChatWidget(self)
+        self.lobbyChat.input_box.setGeometry(600, 480, 190, 220)
+        self.lobbyChat.chat_view.setGeometry(600, 480, 190, 30)
+
+        self.lobbyChat.chat_view.connect(ChatController(),
+                                         SIGNAL('showRoomTextWithRGB(QString,int,int,int)'),
+                                         self.lobbyChat.chat_view.showText)
+        self.lobbyChat.chat_view.connect(GameController(),
+                                         SIGNAL('showRoomTextWithRGB(QString,int,int,int)'),
+                                         self.lobbyChat.chat_view.showText)

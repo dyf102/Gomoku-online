@@ -8,7 +8,7 @@ import threading
 from time import sleep
 from PyQt4.QtCore import *
 
-sys.path.append('../')
+# sys.path.append('../')
 from util.util import new_id
 from lib.netstream import netstream, NET_STATE_ESTABLISHED, NET_STATE_STOP
 PORT = 8888
@@ -128,4 +128,3 @@ class Client(object):
         self.is_scheduler_start = False
         self.start = False
         self.c.close()
-

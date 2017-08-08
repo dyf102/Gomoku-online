@@ -13,6 +13,7 @@ import logging
 from controller.user_controller import UserController
 from controller.chat_controller import ChatController
 from controller.game_controller import GameController
+from controller.basecontroller import BaseController
 
 LOBBY_ROOM_ID = 0
 
@@ -91,9 +92,14 @@ class GameLobbyFrame(QFrame):
         self.parent = parent
         self.setGeometry(0, 0, 800, 600)
 
+        self.game_controller = GameController()
         # UI
         self.game_list_widget = GameListWidget(self)
         self.game_list_widget.setGeometry(40, 40, 550, 450)
+        # self.game_list_widget.connect(BaseController(service_name='game_controller'),
+        #                              SIGNAL('add_game_item(QString)'),
+        #                              self.game_list_widget.add_game_item,
+        #                              Qt.DirectConnection)
 
         self.rankTitle = QLabel(self)
         self.rankTitle.setText('Rank')

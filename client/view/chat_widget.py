@@ -46,6 +46,7 @@ class ChatInput(QWidget):
         self.sendBtn.setDisabled(True)
         self.parent().send_text(str(self.textEdit.text()))
         self.textEdit.clear()
+        self.sendBtn.setDisabled(False)
 
 
 class ChatView(QListView):

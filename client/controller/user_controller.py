@@ -83,10 +83,10 @@ class UserController(BaseController):
             except KeyError:
                 logging.debug("get_rank: %s ", data)
             else:
-                self.emit(SIGNAL('clear'))
+                self.connector.emit(SIGNAL('clear'))
                 for user in user_list:
                     username = user.get('username')
                     point = user.get('point')
-                    self.emit(SIGNAL('add_rank_item(QString, int)'), username, point)
+                    self.connector.emit(SIGNAL('add_rank_item(QString, int)'), username, point)
         else:
             logging.debug("get_user_rank_callback: %s", data)

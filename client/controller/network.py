@@ -6,15 +6,16 @@ import logging
 import json as JSON
 import threading
 from threading import Lock
-
+import time
 mutex = Lock()
 
 from time import sleep
-from PyQt4.QtCore import *
+from PyQt4 import QtCore
 
 # sys.path.append('../')
 from util.util import new_id
 from lib.netstream import netstream, NET_STATE_ESTABLISHED, NET_STATE_STOP
+
 PORT = 8888
 HOST = '127.0.0.1'
 logger = logging
@@ -34,42 +35,14 @@ class Singleton(type):
         return cls._instances[cls]
 
 
-class Client(object):
-    __metaclass__ = Singleton   # ref:https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
+class ReceiverThread(QtCore.QThread):
+    def __init__(self, callback, client):
+        QtCore.QThread.__init__(self)
+        self.c = client
+        self.callback = callback
 
-    def __init__(self):
-        self.c = netstream()
-        self.start = self.is_scheduler_start = False
-        self.receiver = threading.Thread(target=self.receiver)
-        self.receiver.daemon = True
-        self.scheduler = threading.Thread(target=self.scheduler)
-        self.scheduler.daemon = True
-        self.callback = {}
-        self.periodic_task = []
-        self.periodic_task_callback = {}
-
-    def connect(self, adr='127.0.0.1', port=8888):
-        ret = self.c.connect(adr, port)
-        logger.debug('connect %s, %d %d', adr, port, ret)
-        if ret == 0:
-            self.receiver.start()
-            self.scheduler.start()
-            return 0
-        return -1
-
-    def scheduler(self):
-        self.is_scheduler_start = True
-        while self.is_scheduler_start:
-            try:
-                sleep(2)
-            except Exception:
-                logging.exception()
-                break
-            self.handle_periodic_task()
-
-    def receiver(self):
-        self.start = True
-        while self.start:
+    def run(self):
+        while True:
             try:
                 sleep(0.1)  # time module has been collected
             except Exception:
@@ -108,6 +81,51 @@ class Client(object):
             elif self.c.status() == NET_STATE_STOP:
                 pass
 
+
+class SchedulerThread(QtCore.QThread):
+    def __init__(self, periodic_task):
+        QtCore.QThread.__init__(self)
+        self.periodic_task = periodic_task
+
+    def run(self):
+        while True:
+            try:
+                sleep(2)
+            except Exception:
+                logging.exception()
+                break
+            self.handle_periodic_task()
+
+    def handle_periodic_task(self):
+        # print("------%d", len(self.periodic_task))
+        for (task, param) in self.periodic_task:
+            # logger.debug("handle_periodic: %s", task)
+            task(*param)
+
+    def set_periodic_task(self, task, params):
+        self.periodic_task.append((task, params))
+
+
+class Client(object):
+    __metaclass__ = Singleton   # ref:https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
+
+    def __init__(self):
+        self.c = netstream()
+        self.start = self.is_scheduler_start = False
+        self.callback = {}
+        self.receiver = ReceiverThread(self.callback, self.c)
+        self.periodic_task = []
+        self.scheduler = SchedulerThread(self.periodic_task)
+
+    def connect(self, adr='127.0.0.1', port=8888):
+        ret = self.c.connect(adr, port)
+        logger.debug('connect %s, %d %d', adr, port, ret)
+        if ret == 0:
+            self.receiver.start()
+            self.scheduler.start()
+            return 0
+        return -1
+
 # TODO: implement a scheduler to periodically run task in different timeout
     def set_periodic_task(self, task, params, callback, task_id):
         '''
@@ -123,13 +141,8 @@ class Client(object):
         # logger.debug("-----%s %s", str(task_id), str(self.callback.keys()))
         # if task_id not in self.callback.keys():
         self.callback[task_id] = callback
-        self.periodic_task.append((task, params))
-
-    def handle_periodic_task(self):
-        # print("------%d", len(self.periodic_task))
-        for (task, param) in self.periodic_task:
-            # logger.debug("handle_periodic: %s", task)
-            task(*param)
+        self.scheduler.set_periodic_task(task, params)
+        # self.periodic_task.append((task, params))
 
     @staticmethod
     def generate_periodic_task_id(func):
@@ -150,4 +163,8 @@ class Client(object):
     def close(self):
         self.is_scheduler_start = False
         self.start = False
+        self.scheduler.quit()
+        self.receiver.quit()
         self.c.close()
+
+

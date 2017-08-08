@@ -4,7 +4,7 @@ import sys
 import logging
 import json as JSON
 from network import Client
-from PyQt4.QtCore import SIGNAL, QObject, QString
+from PyQt4.QtCore import SIGNAL, QObject, QString, pyqtSignal
 from basecontroller import BaseController
 
 SERVICE_NAME = 'GameService'
@@ -12,6 +12,7 @@ GET_GAME_LIST_ID = "GET_GAME_LIST"
 
 
 class GameController(BaseController):
+    game_list_signal = pyqtSignal(unicode)
 
     def __init__(self):
         BaseController.__init__(self, service_name=SERVICE_NAME)
@@ -33,5 +34,6 @@ class GameController(BaseController):
             self.game_list = game_list
             for game in game_list:
                 txt = '{} vs {}'.format(game.get('host_name'), game.get('guest_name'))
-                logging.debug("----- %s", txt)
-                self.emit(SIGNAL("add_item(QString)"), QString(txt))
+                self.game_list_signal.emit(unicode('123'))
+                # logging.debug("ret : %s", ret)
+

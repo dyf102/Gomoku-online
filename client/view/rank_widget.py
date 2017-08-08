@@ -6,6 +6,7 @@ from controller.user_controller import UserController
 class RankList(QListView):
     def __init__(self, parent=None):
         QListView.__init__(self, parent)
+
         self.setStyleSheet(
             '''
             border-image: url(:btn_bg);
@@ -23,9 +24,9 @@ class RankList(QListView):
         self.setSelectionMode(QAbstractItemView.NoSelection)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setAcceptDrops(True)
-
-        self.connect(UserController(), SIGNAL("add_rank_item(QString, int)"), self.add_rank_item)
-        self.connect(UserController(), SIGNAL("clear"), self.clear)
+        self.user_controller = UserController()
+        self.user_controller.connector.connect(SIGNAL("add_rank_item(QString, int)"), self.add_rank_item)
+        self.user_controller.connector.connect(SIGNAL("clear"), self.clear)
 
     def add_rank_item(self, username, point):
         text = unicode(username) + ': ' + str(point)

@@ -3,12 +3,13 @@
 from PyQt4.QtGui import QListView, \
     QMessageBox, QListWidgetItem, QStandardItemModel, QFont,\
     QAbstractItemView, QStandardItem
-from PyQt4.QtCore import QString, SIGNAL, QSize, Qt
+from PyQt4.QtCore import QString, SIGNAL, QSize, Qt, pyqtSlot
 from controller.game_controller import GameController
 import logging
 
 
 class GameListWidget(QListView):
+
     def __init__(self, parent=None):
         QListView.__init__(self, parent)
         self.game_list = []
@@ -24,13 +25,11 @@ class GameListWidget(QListView):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setAcceptDrops(True)
         self.game_controller = GameController()
-        self.connect(self.game_controller, SIGNAL('add_item(QString)'), self.add_item)
+        self.game_controller.game_list_signal.connect(self.add_game_item, Qt.BlockingQueuedConnection)
 
-    def Clicked(self, item):
-        QMessageBox.information(self, "ListWidget", "You clicked: " + item.text())
-
-    def add_item(self, txt):
-        logging.debug("Add %s", txt)
+    @pyqtSlot(unicode)
+    def add_game_item(self, txt):
+        print"--------------------------------"
         item = QStandardItem(txt)
         item.setTextAlignment(Qt.AlignCenter)
         self.model.appendRow(item)

@@ -1,3 +1,4 @@
+import uuid
 
 EMPTY = 0
 BLACK = 1
@@ -11,7 +12,7 @@ STATUS_SET = (STATUS_EMPTY, STATUS_WAITING, STATUS_FIGHTING)
 
 class Game(object):
 
-    def __init__(self, host_id, host_name, guest_id, guest_name):
+    def __init__(self, host_id, host_name, guest_id=None, guest_name=None):
         self.host_id = host_id
         self.host_name = host_name
         self.guest_id = guest_id
@@ -19,9 +20,19 @@ class Game(object):
         self.host_color = self.guest_color = 0  # undefined
         self.board = [[EMPTY for _ in xrange(15)] for _ in xrange(15)]
         self.status = STATUS_EMPTY
+        self.id = str(uuid.uuid1())
+
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def get_id(self):
+        return self.id
 
     def get_status(self):
         return self.status
+
+    def is_in_game(self, uid):
+        return uid in (self.host_id, self.guest_id)
 
     def set_status(self, new_status):
         assert new_status in STATUS_SET

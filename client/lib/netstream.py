@@ -21,44 +21,30 @@ import errno
 #======================================================================
 class rc4crypt(object):
     def __init__ (self, key = ''):
-        import __builtin__
         self._key = key
         box = [ x for x in xrange(256) ]
+        x = y = 0
         if len(key) > 0:
-            x = y = 0
             for i in xrange(256):
                 x = (x + box[i] + ord(key[i % len(key)])) & 255
                 box[i], box[x] = box[x], box[i]
+            x = y = 0
         self._box = box
-        self._x = 0
-        self._y = 0
-        self.__bytearray = ('bytearray' in __builtin__.__dict__)
+        self._x = x
+        self._y = y
     def crypt (self, data):
-        if len(self._key) == 0 or len(data) == 0:
-            return data
-        if not self.__bytearray:
-            box = self._box
-            x, y = self._x, self._y
-            if len(self._key) == 0:
-                return data
-            out = []
-            for ch in data:
-                x = (x + 1) & 255
-                y = (y + box[x]) & 255
-                box[x], box[y] = box[y], box[x]
-                out.append(chr(ord(ch) ^ box[(box[x] + box[y]) & 255]))
-            self._x, self._y = x, y
-            return ''.join(out)
         box = self._box
-        output = bytearray(data)
-        x, y, p = self._x, self._y, 0
-        for i, ch in enumerate(output):
+        x, y = self._x, self._y
+        if len(self._key) == 0:
+            return data
+        out = []
+        for ch in data:
             x = (x + 1) & 255
             y = (y + box[x]) & 255
             box[x], box[y] = box[y], box[x]
-            output[i] = ch ^ box[(box[x] + box[y]) & 255]
+            out.append(chr(ord(ch) ^ box[(box[x] + box[y]) & 255]))
         self._x, self._y = x, y
-        return str(output)
+        return ''.join(out)
 
 
 #======================================================================
@@ -76,17 +62,16 @@ HEAD_DWORD_LSB_EXCLUDE  = 8    # 4 bytes little endian, exclude itself
 HEAD_DWORD_MSB_EXCLUDE  = 9    # 4 bytes big endian, exclude itself
 HEAD_BYTE_LSB_EXCLUDE   = 10   # 1 byte little endian, exclude itself
 HEAD_BYTE_MSB_EXCLUDE   = 11   # 1 byte big endian, exclude itself
-HEAD_DWORD_LSB_MASK        = 12   # 4 bytes little endian (x86) with mask
+HEAD_DWORD_LSB_MASK     = 12   # 4 bytes little endian (x86) with mask
 HEAD_RAW                = 13   # raw message
-HEAD_LINE                = 14   # messages splited by '\n'
 
-HEAD_HDR = (2, 2, 4, 4, 1, 1, 2, 2, 4, 4, 1, 1, 0, 0, 0)
-HEAD_INC = (0, 0, 0, 0, 0, 0, 2, 2, 4, 4, 1, 1, 0, 0, 0)
+HEAD_HDR = (2, 2, 4, 4, 1, 1, 2, 2, 4, 4, 1, 1, 0, 0)
+HEAD_INC = (0, 0, 0, 0, 0, 0, 2, 2, 4, 4, 1, 1, 0, 0)
 HEAD_FMT = ('<H', '>H', '<I', '>I', '<B', '>B')
 
-NET_STATE_STOP = 0                # state: init value
+NET_STATE_STOP = 0              # state: init value
 NET_STATE_CONNECTING = 1        # state: connecting
-NET_STATE_ESTABLISHED = 2        # state: connected
+NET_STATE_ESTABLISHED = 2       # state: connected
 
 
 #======================================================================
@@ -96,10 +81,10 @@ class netstream(object):
 
     def __init__(self, head = HEAD_WORD_LSB):
         self.sock = None        # socket object
-        self.send_buf = ''        # send buffer
-        self.recv_buf = ''        # recv buffer
+        self.send_buf = ''      # send buffer
+        self.recv_buf = ''      # recv buffer
         self.state = NET_STATE_STOP
-        self.errd = [ errno.EINPROGRESS, errno.EALREADY, errno.EWOULDBLOCK ]
+        self.errd = ( errno.EINPROGRESS, errno.EALREADY, errno.EWOULDBLOCK )
         self.conn = ( errno.EISCONN, 10057, 10053 )
         self.errc = 0
         self.headmsk = False
@@ -111,9 +96,6 @@ class netstream(object):
         self.eintr = ()
         if 'EINTR' in errno.__dict__:
             self.eintr = (errno.__dict__['EINTR'],)
-        if 'WSAEWOULDBLOCK' in errno.__dict__:
-            self.errd.append(errno.WSAEWOULDBLOCK)
-        self.errd = tuple(self.errd)
         self.block = False
     
     def __head_init(self, head):
@@ -122,17 +104,15 @@ class netstream(object):
         if head == HEAD_DWORD_LSB_MASK:
             head = HEAD_DWORD_LSB
             self.headmsk = True
-        if (head < 0) or (head > 14): head = 0
+        if (head < 0) or (head > 13): head = 0
         mode = head % 6
         self.__head_mode = head
         self.__head_hdr = HEAD_HDR[head]
         self.__head_inc = HEAD_INC[head]
         self.__head_fmt = HEAD_FMT[mode]
         self.__head_int = mode
-        if head in (13, 14):
+        if head == 13:
             self.headraw = True
-        self.lines = []
-        self.cache = ''
         return 0
 
     def __try_connect(self):
@@ -161,7 +141,7 @@ class netstream(object):
         while 1:
             text = ''
             try:
-                text = self.sock.recv(4096)
+                text = self.sock.recv(1024)
                 if not text:
                     self.errc = 10000
                     self.close()
@@ -229,7 +209,7 @@ class netstream(object):
         self.send_buf = ''
         self.recv_buf = ''
         self.errc = 0
-        if head >= 0 and head <= 14:
+        if head >= 0 and head <= 13:
             self.__head_init(head)
         if self.block:
             self.state = NET_STATE_ESTABLISHED
@@ -259,7 +239,7 @@ class netstream(object):
         self.sock.setblocking(self.block and 1 or 0)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
         self.state = NET_STATE_ESTABLISHED
-        if head >= 0 and head <= 14:
+        if head >= 0 and head <= 13:
             self.__head_init(head)
         self.send_buf = ''
         self.recv_buf = ''
@@ -342,31 +322,13 @@ class netstream(object):
             return None
         if self.headraw:
             text = ''
-            if self.__head_mode == 14:
-                while not self.lines:
-                    t = ''
-                    try:
-                        t = self.sock.recv(0x1000)
-                    except socket.error, e:
-                        if not (e.error in self.eintr):
-                            self.close()
-                            return None
-                    if not t:
-                        continue
-                    lines = (self.cache + t).split('\n')
-                    self.cache = lines.pop()
-                    for n in lines:
-                        self.lines.append(n)
-                text = self.lines[0]
-                self.lines = self.lines[1:]
-                return text + '\n'
-            while not text:
-                try: 
-                    text = self.sock.recv(0x1000)
-                except socket.error, e:
-                    if not (e.errno in self.eintr): 
-                        self.close()
-                        return None
+            try: 
+                text = self.sock.recv(0x1000)
+            except socket.error, e:
+                if not (e.errno in self.eintr): 
+                    self.close()
+                    return None
+                return rdata
             return text
         rsize = self.__recv_all(self.__head_hdr)
         if len(rsize) < self.__head_hdr:
@@ -399,18 +361,6 @@ class netstream(object):
         if self.block:
             return self.__block_recv()
         if self.headraw:
-            if self.__head_mode == 14:
-                if self.recv_buf:
-                    lines = (self.cache + self.recv_buf).split('\n')
-                    self.recv_buf = ''
-                    self.cache = lines.pop()
-                    for n in lines:
-                        self.lines.append(n)
-                if self.lines:
-                    hr = self.lines[0]
-                    self.lines = self.lines[1:]
-                    return hr + '\n'
-                return ''
             return self.__recv_raw(len(self.recv_buf))
         rsize = self.__peek_raw(self.__head_hdr)
         if (len(rsize) < self.__head_hdr):
@@ -482,10 +432,10 @@ class netstream(object):
 #======================================================================
 # nethost - basic tcp host
 #======================================================================
-NET_NEW =        0    # new connection：(id,tag) ip/d,port/w   <hid>
-NET_LEAVE =        1    # lost connection：(id,tag)           <hid>
-NET_DATA =        2    # data comming：(id,tag) data...    <hid>
-NET_TIMER =        3    # timer event: (none, none) 
+NET_NEW =       0   # new connection��(id,tag) ip/d,port/w   <hid>
+NET_LEAVE =     1   # lost connection��(id,tag)         <hid>
+NET_DATA =      2   # data comming��(id,tag) data...    <hid>
+NET_TIMER =     3   # timer event: (none, none) 
 
 
 #======================================================================
@@ -494,7 +444,7 @@ NET_TIMER =        3    # timer event: (none, none)
 class nethost(object):
 
     def __init__ (self, head = HEAD_WORD_LSB):
-        self.host = '0.0.0.0'
+        self.host = 0
         self.state = 0
         self.clients = []
         self.index = 1
@@ -508,24 +458,19 @@ class nethost(object):
         self.period = 0
     
     # start listenning
-    def startup(self, port = 0, host = ''):
+    def startup(self, port = 0):
         self.shutdown()
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        try: self.sock.bind((host, port))
+        try: self.sock.bind(('0.0.0.0', port))
         except: 
             try: self.sock.close()
             except: pass
             return -1
-        try: self.sock.listen(65536)
-        except:
-            try: self.sock.close()
-            except: pass
-            return -1
+        self.sock.listen(65536)
         self.sock.setblocking(0)
         self.port = self.sock.getsockname()[1]
         self.state = 1
-        self.host = host
         self.timeslap = long(time.time() * 1000)
         return 0
 
@@ -596,7 +541,6 @@ class nethost(object):
             client.tag = 0
             client.active = current
             client.peername = sock.getpeername()
-            client.keepalive(1)
             self.clients[pos] = client
             self.count += 1
             self.queue.append((NET_NEW, hid, 0, repr(client.peername)))
@@ -681,43 +625,43 @@ class nethost(object):
 #----------------------------------------------------------------------
 # instructions
 #----------------------------------------------------------------------
-ITMT_NEW    =    0    # 新近外部连接：(id,tag) ip/d,port/w
-ITMT_LEAVE    =    1    # 断开外部连接：(id,tag)
-ITMT_DATA    =    2    # 外部数据到达：(id,tag) data...
-ITMT_CHANNEL=    3    # 频道通信：(channel,tag)
-ITMT_CHNEW    =    4    # 频道开启：(channel,id)
-ITMT_CHSTOP    =    5    # 频道断开：(channel,tag)
-ITMT_SYSCD =    6    # 系统信息：(subtype, v) data...
-ITMT_TIMER    =    7    # 系统时钟：(timesec,timeusec)
-ITMT_NOOP    =    8    # 空指令：(wparam, lparam)
-ITMT_UNRDAT    =    10    # 不可靠数据包：(id,tag)
+ITMT_NEW    =   0   # �½��ⲿ���ӣ�(id,tag) ip/d,port/w
+ITMT_LEAVE  =   1   # �Ͽ��ⲿ���ӣ�(id,tag)
+ITMT_DATA   =   2   # �ⲿ���ݵ��(id,tag) data...
+ITMT_CHANNEL=   3   # Ƶ��ͨ�ţ�(channel,tag)
+ITMT_CHNEW  =   4   # Ƶ��������(channel,id)
+ITMT_CHSTOP =   5   # Ƶ���Ͽ���(channel,tag)
+ITMT_SYSCD =    6   # ϵͳ��Ϣ��(subtype, v) data...
+ITMT_TIMER  =   7   # ϵͳʱ�ӣ�(timesec,timeusec)
+ITMT_NOOP   =   8   # ��ָ�(wparam, lparam)
+ITMT_UNRDAT =   10  # ���ɿ����ݰ���(id,tag)
 
-ITMC_DATA    =    0    # 外部数据发送：(id,*) data...
-ITMC_CLOSE    =    1    # 关闭外部连接：(id,*)
-ITMC_TAG    =    2    # 设置TAG：(id,tag)
-ITMC_CHANNEL=    3    # 组间通信：(channel,*) data...
-ITMC_MOVEC    =    4    # 移动外部连接：(channel,id) data...
-ITMC_SYSCD  =    5    # 系统控制数据：(subtype, v) data...
+ITMC_DATA   =   0   # �ⲿ���ݷ��ͣ�(id,*) data...
+ITMC_CLOSE  =   1   # �ر��ⲿ���ӣ�(id,*)
+ITMC_TAG    =   2   # ����TAG��(id,tag)
+ITMC_CHANNEL=   3   # ���ͨ�ţ�(channel,*) data...
+ITMC_MOVEC  =   4   # �ƶ��ⲿ���ӣ�(channel,id) data...
+ITMC_SYSCD  =   5   # ϵͳ�������ݣ�(subtype, v) data...
 ITMC_BROADCAST =6
-ITMC_NOOP    =    7    # 空指令：(*,*)
-ITMC_UNRDAT    =    10    # 不可靠数据包：(id,tag)
+ITMC_NOOP   =   7   # ��ָ�(*,*)
+ITMC_UNRDAT =   10  # ���ɿ����ݰ���(id,tag)
 
-ITMS_CONNC =        0    # 请求连接数量(st,0) cu/d,cc/d
-ITMS_LOGLV =        1    # 设置日志级别(st,level)
-ITMS_LISTC =        2    # 返回频道信息(st,cn) d[ch,id,tag],w[t,c]
-ITMS_RTIME =        3    # 系统运行时间(st,wtime)
-ITMS_TMVER =        4    # 传输模块版本(st,tmver)
-ITMS_REHID =        5    # 返回频道的(st,ch)
-ITMS_QUITD =        6    # 请求自己退出
-ITMS_TIMER =        8    # 设置频道零的时钟(st,timems)
-ITMS_INTERVAL =        9    # 设置是否为间隔模式(st,isinterval)
-ITMS_FASTMODE =        10    # 设置是否启用快速模式
-ITMS_CHID        = 11
-ITMS_BOOKADD    = 12    # 增加订阅
-ITMS_BOOKDEL    = 13    # 取消订阅
-ITMS_BOOKRST    = 14    # 清空订阅
-ITMS_RC4SKEY    = 16    # 设置发送KEY (st, hid) key
-ITMS_RC4RKEY    = 17    # 设置接收KEY (st, hid) key
+ITMS_CONNC =        0    # ������������(st,0) cu/d,cc/d
+ITMS_LOGLV =        1    # ������־����(st,level)
+ITMS_LISTC =        2    # ����Ƶ����Ϣ(st,cn) d[ch,id,tag],w[t,c]
+ITMS_RTIME =        3    # ϵͳ����ʱ��(st,wtime)
+ITMS_TMVER =        4    # ����ģ��汾(st,tmver)
+ITMS_REHID =        5    # ����Ƶ����(st,ch)
+ITMS_QUITD =        6    # �����Լ��˳�
+ITMS_TIMER =        8    # ����Ƶ�����ʱ��(st,timems)
+ITMS_INTERVAL =        9    # �����Ƿ�Ϊ���ģʽ(st,isinterval)
+ITMS_FASTMODE =        10    # �����Ƿ����ÿ���ģʽ
+ITMS_CHID       = 11
+ITMS_BOOKADD    = 12    # ���Ӷ���
+ITMS_BOOKDEL    = 13    # ȡ������
+ITMS_BOOKRST    = 14    # ��ն���
+ITMS_RC4SKEY    = 16    # ���÷���KEY (st, hid) key
+ITMS_RC4RKEY    = 17    # ���ý���KEY (st, hid) key
 
 
 #----------------------------------------------------------------------
@@ -898,310 +842,6 @@ class TelnetServer(object):
                 del self._data[wparam]
             except: pass
 
-
-
-#----------------------------------------------------------------------
-# TelnetConsole
-# 在用 Telnet输入 Python 命令行时，以 $开头的命令会传递给 handle处理
-# 最好安装 rlwrap工具，使用 readline包装 telnet，支持上下查询输入历史：
-# rlwrap telnet 127.0.0.1 2000
-# 如果提供了 logout函数，那么所有操作过的命令行命令都会被日志记录。
-#----------------------------------------------------------------------
-class TelnetConsole (nethost):
-
-    # handle 是处理以 $开头的 gm命令回调，intro是返回欢迎语句的回调，
-    # logout 是写日志的回调
-    def __init__ (self, handle, intro = None, logout = None, namespace = ''):
-        self._console = {}
-        self._users = {}
-        self._server = nethost(14)
-        self._handle = handle
-        self._intro = intro
-        self._login = True
-        self._logout = logout
-        self._python = True
-        self.namespace = namespace and namespace or '__console__'
-        self.ps1 = '>>> '
-        self.ps2 = '... '
-        self.initialize = ''
-
-    # 开始服务，login为是否需要登录，NoPython为真代表禁止python命令行，仅gm指令
-    def start (self, port, host = '127.0.0.1', login = True, NoPython = False):
-        self._console = {}
-        self._users = {}
-        self._host = host
-        self._port = port
-        self._login = login
-        self._server.timeout = 3600
-        self._python = (not NoPython) and True or False
-        hr = self._server.startup(self._port, self._host)
-        if port == 0 and hr == 0:
-            self._port = self._server.port
-            port = self._port
-        self.mlog('listen on %s:%d %s'%(host, port, hr and 'error' or 'ok'))
-        return hr
-    
-    # 关闭服务
-    def shutdown (self):
-        self._server.shutdown()
-        self._console = {}
-        self._users = {}
-
-    # 更新，0.1秒调用一次即可
-    def process (self):
-        self._server.process()
-        while 1:
-            event, wparam, lparam, data = self._server.read()
-            if event < 0: break
-            try:
-                if event == NET_NEW:
-                    self.__handle_new(wparam, data)
-                elif event == NET_LEAVE:
-                    self.__handle_leave(wparam)
-                elif event == NET_DATA:
-                    self.__handle_push(wparam, data)
-            except:
-                import StringIO, traceback
-                sio = StringIO.StringIO()
-                traceback.print_exc(file = sio)
-                for line in sio.getvalue().split('\n'):
-                    self.mlog(line.rstrip('\r\n\t '))
-        return True
-
-    # TelnetServer 写日志
-    def mlog (self, text):
-        if self._logout:
-            self._logout(text)
-        return 0
-
-    # 向某客户端发送字符串
-    def write (self, hid, text):
-        if not text:
-            return False
-        text = text.replace('\r\n', '\n').replace('\n', '\r\n')
-        if type(text) == type(u''):
-            encoding = getattr(sys.stdin, "encoding", None)
-            try:
-                text = text.encode(encoding)
-            except:
-                pass
-        self._server.send(hid, text)
-        return True
-    
-    # 完成登录后，运行初始化脚本 self.initialize，显示版本信息
-    def __hello (self, hid):
-        if not self._python:
-            self.write(hid, self.ps1)
-            return False
-        if self.initialize and (hid in self._console):
-            ic = self._console.get(hid, None)
-            self.__environ_enter()
-            try:
-                exec self.initialize in globals(), ic.m_dict
-            except:
-                import traceback
-                traceback.print_exc(file = sys.stdout)
-            text = self.__environ_leave()
-            if text:
-                self.write(hid, text)
-        cprt = 'Type "help", "copyright", "credits" or "license" for more information.'
-        self.write(hid, "Python %s on %s\r\n%s\r\n(%s)\r\n%s" %
-                   (sys.version, sys.platform, cprt, self.__class__.__name__, self.ps1))
-        return True
-
-    # 处理：新用户连接
-    def __handle_new (self, hid, remote):
-        import imp, code
-        if not self.namespace in sys.modules:
-            sys.modules[self.namespace] = imp.new_module(self.namespace)
-        cm = sys.modules[self.namespace]
-        xm = time.strftime('C%Y%m%d%H%M%S', time.localtime())
-        nm = xm
-        id = 1
-        while nm in cm.__dict__:
-            nm = xm + '_' + str(id)
-            id += 1
-        package = self.namespace + '.' + nm
-        mm = imp.new_module(package)
-        cm.__dict__[nm] = mm
-        ic = code.InteractiveConsole(locals = mm.__dict__)
-        ic.m_hid = hid
-        ic.m_login = False
-        ic.m_remote = remote
-        ic.m_name = nm
-        ic.m_package = package
-        ic.m_user = (not self._login) and nm or None
-        ic.m_dict = mm.__dict__
-        info = {}
-        mm.__dict__['__history__'] = []
-        mm.__dict__['__info__'] = info
-        info['remote'] = remote
-        info['hid'] = hid
-        info['name'] = nm
-        info['timestamp'] = time.strftime('%Y%m%d%H%M%S', time.localtime())
-        self._console[hid] = ic
-        self._server.nodelay(hid, 1)
-        self.mlog('new connection with hid=%xh address=%s'%(hid, remote))
-        if self._intro:
-            try:
-                text = self._intro(hid)
-            except:
-                text = ''
-            self.write(hid, text)
-        if self._login:
-            self.write(hid, 'Login: ')
-        else:
-            self.__hello(hid)
-        return 0
-    
-    # 处理：连接断开
-    def __handle_leave (self, hid):
-        ic = self._console.get(hid, None)
-        if not ic:
-            return -1
-        self.mlog('closed connection with hid=%xh address=%s user=%s'%(\
-                    hid, ic.m_remote, ic.m_user))
-        del self._console[hid]
-        ic.m_dict = None
-        ic = None
-        return 0
-    
-    # 处理：收到一行新的用户输入
-    def __handle_push (self, hid, data):
-        ic = self._console.get(hid, None)
-        if not ic:
-            self._server.close(hid)
-            return -1
-        data = data.rstrip('\r\n\t ')
-        if data[:4] in ('\x04\x04\x04\x04', '\xff\xed\xff\xfd'):
-            self._server.close(hid)
-            return
-        if (not ic.m_user) and self._login:
-            if not data:
-                self.write(hid, 'Login: ')
-                return
-            user = data.strip('\r\n\t ')
-            if user in self._users:
-                self.write(hid, '%s exists\nLogin: ')
-            else:
-                ic.m_user = user
-                ic.m_dict['__info__']['user'] = user
-                self.write(hid, 'Hello %s\n\n'%user)
-                self.__hello(hid)
-        else:
-            text = data.lstrip('\r\n\t ')
-            if text[:1] == '$':
-                self.__run_gm_cmd(hid, ic, text[1:])
-                self.write(hid, self.ps1)
-            elif data in ('exit()', 'quit()'):
-                self._server.close(hid)
-            elif self._python:
-                self.__run_py_cmd(hid, ic, data)
-            else:
-                self.write(hid, self.ps1)
-        return 0
-    
-    # 替换退出命令
-    def __replace_exit (self, code = 0):
-        import sys
-        sys.stdout.write('user exit() to quit\n')
-    
-    # 进入安全环境：准备开始执行用户发上来的语句
-    def __environ_enter (self):
-        import StringIO
-        sio = StringIO.StringIO()
-        self.__save_stdout = sys.stdout
-        self.__save_stderr = sys.stderr
-        self.__save_stdin = sys.stdin
-        self.__save_exit = sys.exit
-        self.__save_sio = sio
-        sys.stdout = sio
-        sys.stderr = sio
-        sys.stdin = StringIO.StringIO()
-        sys.exit = self.__replace_exit
-    
-    # 离开安全环境：执行完用户语句后调用，返回输出
-    def __environ_leave (self):
-        sys.exit = self.__save_exit
-        sys.stdout = self.__save_stdout
-        sys.stderr = self.__save_stderr
-        sys.stdin = self.__save_stdin
-        return self.__save_sio.getvalue()
-    
-    # 执行 gm命令
-    def __run_gm_cmd (self, hid, ic, line):
-        if not line:
-            return 0
-        if line == 'exit':
-            self._server.close(hid)
-        elif line == 'who':
-            names = []
-            for c in self._console.itervalues():
-                names.append(c.m_user)
-            self.write(hid, '%s\n'%repr(names))
-        elif line[:4] == 'say ':
-            for h in self._console:
-                self.write(h, 'from %s: %s\n'%(ic.m_user, line[4:]))
-        else:
-            hr = ''
-            try:
-                if self._handle:
-                    ic.m_dict['__history__'].append('$' + line)
-                    self.mlog('(%s): $%s'%(ic.m_user, line))
-                    hr = self._handle(line)
-            except Exception, e:
-                self.write(hid, str(e.message) + '\n')
-            if hr:
-                self.write(hid, hr)
-        return 0
-    
-    # 执行 python命令行脚本
-    def __run_py_cmd (self, hid, ic, line):
-        if line.rstrip('\r\n\t '):
-            ic.m_dict['__history__'].append(line)
-            self.mlog('(%s): %s'%(ic.m_user, line))
-        self.__environ_enter()
-        more = ic.push(line)
-        output = self.__environ_leave()
-        if not more:
-            self.write(hid, output + self.ps1)
-        else:
-            self.write(hid, output + self.ps2)
-        return 0
-
-
-
-#----------------------------------------------------------------------
-# demo_telnet()
-#----------------------------------------------------------------------
-def demo_telnet():
-
-    # 写日志的 callback
-    def writelog(text):
-        import time
-        tm = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-        sys.stdout.write('[%s] [CONSOLE] %s\n'%(tm, text))
-    # 处理 gm命令的 callback，处理在命令行下以$开头的命令
-    def handle(text):
-        if text == 'help':
-            return 'helpme\n'
-        elif text == 'about':
-            return 'demo_telnet()\n'
-        return ''
-    # 开头欢迎语句
-    def intro(hid):
-        return '\r\nTelnetConsole Demo\r\n'
-    
-    # 创建对象
-    tc = TelnetConsole(handle, intro, writelog)
-    tc.initialize = 'print "init"\nfrom math import *\nprint "ok"'
-    # 用于演示，地址监听所有IP，便于其他机器连入，正式使用上 127.0.0.1
-    tc.start(8000, '0.0.0.0')
-    while 1:
-        import time
-        time.sleep(0.01)
-        tc.process()
-    return 0
 
 
 #----------------------------------------------------------------------

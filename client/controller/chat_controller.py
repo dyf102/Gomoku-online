@@ -28,6 +28,7 @@ class ChatController(BaseController):
         self.c.register(JOIN_CHAT_ROOM_ID, self.join_chat_room_cb)
         self.chat_token_pool = {}  # to avoid unnecessary update
         # self.user_controller = UserController()
+        self.counter = 0
 
     def send_msg(self, cid, uid, msg, username):
         print('called send msg')
@@ -80,7 +81,9 @@ class ChatController(BaseController):
         req = {
             'cid': cid,
             'uid': uid,
+            # '-----': self.counter,
         }
+        self.counter += 1
         client.send(service_name=SERVICE_NAME, method=JOIN_CHAT_ROOM_ID, msg=req)
 
     @log_callback

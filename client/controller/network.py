@@ -5,6 +5,10 @@ import sys
 import logging
 import json as JSON
 import threading
+from threading import Lock
+
+mutex = Lock()
+
 from time import sleep
 from PyQt4.QtCore import *
 
@@ -74,7 +78,11 @@ class Client(object):
             self.c.process()
             if self.c.status() == NET_STATE_ESTABLISHED:
                 while True:
-                    data = self.c.recv()
+                    mutex.acquire()
+                    try:
+                        data = self.c.recv()
+                    finally:
+                        mutex.release()
                     if data:
                         logging.debug('recv %s', data)
                         try:
@@ -128,7 +136,11 @@ class Client(object):
         return 'poll_' + str(func.__name__)
 
     def send(self, service_name, method, msg):
-        self.c.send('{}\r\n{}\r\n{}'.format(service_name, method, JSON.dumps(msg)))
+        mutex.acquire()
+        try:
+            self.c.send('{}\r\n{}\r\n{}'.format(service_name, method, JSON.dumps(msg)))
+        finally:
+            mutex.release()
 
     def register(self, key, callback):
         if not callable(callback):

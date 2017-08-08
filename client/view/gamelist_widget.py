@@ -23,13 +23,13 @@ class GameListWidget(QListView):
         self.setSelectionMode(QAbstractItemView.NoSelection)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setAcceptDrops(True)
-
-        self.connect(GameController(), SIGNAL('add_item(QString)'), self.add)
+        self.game_controller = GameController()
+        self.connect(self.game_controller, SIGNAL('add_item(QString)'), self.add_item)
 
     def Clicked(self, item):
         QMessageBox.information(self, "ListWidget", "You clicked: " + item.text())
 
-    def add(self, txt):
+    def add_item(self, txt):
         logging.debug("Add %s", txt)
         item = QStandardItem(txt)
         item.setTextAlignment(Qt.AlignCenter)

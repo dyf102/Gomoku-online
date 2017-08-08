@@ -8,9 +8,10 @@ from game_control_widget import GameControlWidget
 
 
 class GameWindow(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, rid=0):
         QWidget.__init__(self, parent)
         self.resize(800, 520)
+        self.rid = rid
         self.chat = ChatWidget(self)
 
         self.chessboard = ChessBoard(self)
@@ -27,6 +28,6 @@ class GameWindow(QWidget):
             if ret == 0:
                 self.isClosable = True
                 self.close()
-                #game_room_manager.GameRoomManager().leaveRoom()
+                # game_room_manager.GameRoomManager().leaveRoom()
             else:
                 event.ignore()

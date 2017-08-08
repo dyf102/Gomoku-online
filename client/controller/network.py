@@ -62,7 +62,7 @@ class ReceiverThread(QtCore.QThread):
                             msg = JSON.loads(data)
                         except ValueError:
                             logging.debug('JSON FORMAT Exception %s', data)
-                        print(msg)
+                        # print(msg)
                         _id = msg.get('id')
                         if _id is None:
                             logging.debug('no id %s', data)

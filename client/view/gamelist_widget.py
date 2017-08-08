@@ -25,7 +25,7 @@ class GameListWidget(QListView):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setAcceptDrops(True)
         self.game_controller = GameController()
-        self.game_controller.game_list_signal.connect(self.add_game_item, Qt.BlockingQueuedConnection)
+        self.game_controller.game_list_signal.connect(self.add_game_item)
 
     @pyqtSlot(unicode)
     def add_game_item(self, txt):

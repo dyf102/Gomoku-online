@@ -37,3 +37,5 @@ class GameController(BaseController):
                 self.game_list_signal.emit(unicode('123'))
                 # logging.debug("ret : %s", ret)
 
+    def testEmit(self):
+        self.game_list_signal.emit(unicode('123'))

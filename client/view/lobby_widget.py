@@ -7,6 +7,7 @@ from login_widget import LoginDialog
 from chat_widget import ChatWidget
 from rank_widget import RankList
 from gamelist_widget import GameListWidget
+from game_window_widget import GameWindow
 import logging
 
 # sys.path.append('../')
@@ -95,7 +96,9 @@ class GameLobbyFrame(QFrame):
         self.game_controller = GameController()
         # UI
         self.game_list_widget = GameListWidget(self)
-        self.game_list_widget.setGeometry(40, 40, 550, 450)
+        self.game_windows = GameWindow(self, rid=1)
+
+        self.game_windows.setGeometry(40, 40, 550, 450)
         # self.game_list_widget.connect(BaseController(service_name='game_controller'),
         #                              SIGNAL('add_game_item(QString)'),
         #                              self.game_list_widget.add_game_item,

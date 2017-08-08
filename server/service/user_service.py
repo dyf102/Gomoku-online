@@ -24,6 +24,11 @@ class UserService(BaseService):
         @register(self)
         @handler
         def login(uid, username):
+            new_user = {}
+            for k,v in self.current_user.items():
+                if v.username != username:
+                    new_user[k] = v
+            self.current_user = new_user
             self.current_user[uid] = User(username=username, uid=uid)
             return {'code': 200, 'uid': uid, 'username': username}
 

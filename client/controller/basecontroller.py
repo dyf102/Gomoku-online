@@ -59,6 +59,7 @@ class BaseController(QObject):
 # will be called in Qt's thread.
 
 
+@singleton
 class SafeConnector:
     def __init__(self):
         self._rsock, self._wsock = socket.socketpair()

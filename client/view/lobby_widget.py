@@ -96,9 +96,9 @@ class GameLobbyFrame(QFrame):
         self.game_controller = GameController()
         # UI
         self.game_list_widget = GameListWidget(self)
-        self.game_windows = GameWindow(self, rid=1)
+        # self.game_windows = GameWindow(self, rid=1)
 
-        self.game_windows.setGeometry(40, 40, 550, 450)
+        self.game_list_widget.setGeometry(40, 40, 550, 450)
         # self.game_list_widget.connect(BaseController(service_name='game_controller'),
         #                              SIGNAL('add_game_item(QString)'),
         #                              self.game_list_widget.add_game_item,
@@ -126,3 +126,7 @@ class GameLobbyFrame(QFrame):
         self.lobbyChat.chat_view.connect(GameController(),
                                          SIGNAL('showRoomTextWithRGB(QString,int,int,int)'),
                                          self.lobbyChat.chat_view.showText)
+
+
+
+

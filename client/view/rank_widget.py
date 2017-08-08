@@ -37,23 +37,3 @@ class RankList(QListView):
     def clear(self):
         self.model.clear()
 
-    '''
-        def refresh(self):
-        self.model.clear()
-        rank = 0
-        for user in [{'uid': 123, 'point': 12}]:
-            if 'uid' in user and 'point' in user:
-                text = user['uid'] + ' : ' + str(user['point'])
-                item = QStandardItem(text)
-                item.setTextAlignment(Qt.AlignCenter)
-                item.setFont(QFont(50))
-                if rank == 0:
-                    item.setForeground(QBrush(QColor(255, 0, 0)))
-                if rank == 1:
-                    item.setForeground(QBrush(QColor(200, 0, 0)))
-                if rank == 2:
-                    item.setForeground(QBrush(QColor(150, 0, 0)))
-                self.model.appendRow(item)
-                rank += 1
-    '''
-

@@ -17,6 +17,7 @@ class GameController(BaseController):
     def __init__(self):
         BaseController.__init__(self, service_name=SERVICE_NAME)
         self.game_list = None
+        # self.c.register(GET_GAME_LIST_ID, self.get_game_list_callback)
 
     def add_polling_game_list_task(self):
         client = self.get_client()
@@ -34,8 +35,8 @@ class GameController(BaseController):
             self.game_list = game_list
             for game in game_list:
                 txt = '{} vs {}'.format(game.get('host_name'), game.get('guest_name'))
-                self.game_list_signal.emit(unicode('123'))
-                # logging.debug("ret : %s", ret)
+                self.connector.emit(SIGNAL('game_list'), QString(txt))
+                logging.debug("ret : %s", txt)
 
     def testEmit(self):
         self.game_list_signal.emit(unicode('123'))

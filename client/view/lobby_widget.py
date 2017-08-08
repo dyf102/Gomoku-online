@@ -43,6 +43,10 @@ class GameLobby(QWidget):
         self.connect(self.login_widget, SIGNAL("login(QString,int,QString)"),
                      self.login)
         self.connect(self.chat_controller, SIGNAL("error_msg(QString)"), self.error_msg)
+
+        self.connect(GameListWidget(), SIGNAL("enter_room(QString, QString)"), self.enter_room)
+
+
         self.msg_box = QMessageBox()
 
     def close_login_dialog(self):
@@ -85,6 +89,10 @@ class GameLobby(QWidget):
         self.msg_box.setText(msg)
         self.msg_box.exec_()
 
+    def enter_room(self, rid, title):
+        self.room_window = GameWindow(self)
+        self.room_window.setWindowTitle(title)
+        self.roomWindow.show()
 
 class GameLobbyFrame(QFrame):
     def __init__(self, parent=None):
@@ -97,7 +105,7 @@ class GameLobbyFrame(QFrame):
         # UI
         self.game_list_widget = GameListWidget(self)
         # self.game_windows = GameWindow(self, rid=1)
-
+        #self.game_list_widget.doubleClicked.connect(self.game_list_widget.double_click_on_item)
         self.game_list_widget.setGeometry(40, 40, 550, 450)
         # self.game_list_widget.connect(BaseController(service_name='game_controller'),
         #                              SIGNAL('add_game_item(QString)'),

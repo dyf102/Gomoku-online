@@ -20,16 +20,25 @@ class GameListWidget(QListView):
         self.setGridSize(QSize(self.rect().width(), 30))
         self.setFont(QFont("Microsoft YaHei", 10))
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.setFocusPolicy(Qt.NoFocus)
-        self.setSelectionMode(QAbstractItemView.NoSelection)
+        # self.setFocusPolicy(Qt.NoFocus)
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setAcceptDrops(True)
+        #self.setAcceptDrops(True)
         self.game_controller = GameController()
         self.game_controller.connector.connect(SIGNAL('game_list'), self.add_game_item)
+        self.game_controller.connector.connect(SIGNAL('game_list_clear'), self.clear)
 
-    #@pyqtSlot(unicode)
-    def add_game_item(self, txt):
-        print"--------------------------------"
+        self.clicked.connect(self.double_click_on_item)  ## ??????
+
+    def double_click_on_item(self, idx):
+        print('%d was clicked' % (idx))
+        self.emit(SIGNAL("enter_room(QString, QString)"), self.game_list[idx][0],self.game_list[idx][1] )
+
+    def add_game_item(self, txt, id):
+        self.game_list.append((id, txt))
         item = QStandardItem(txt)
         item.setTextAlignment(Qt.AlignCenter)
         self.model.appendRow(item)
+
+    def clear(self):
+        self.model.clear()

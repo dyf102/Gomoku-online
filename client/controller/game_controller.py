@@ -33,9 +33,14 @@ class GameController(BaseController):
             game_list = data.get(u'list')
             logging.debug("get_game_list_callback %s", game_list)
             self.game_list = game_list
+            self.connector.emit(SIGNAL('game_list_clear'))
             for game in game_list:
                 txt = '{} vs {}'.format(game.get('host_name'), game.get('guest_name'))
-                self.connector.emit(SIGNAL('game_list'), QString(txt))
+                id = game.get('id')
+                if id is None:
+                    logging.debug("Invalid format %s", game)
+                    continue
+                self.connector.emit(SIGNAL('game_list'), QString(txt), QString(id))
                 logging.debug("ret : %s", txt)
 
     def testEmit(self):
